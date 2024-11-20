@@ -1,18 +1,18 @@
 <style>
 .table-scroll {
-    position: fixed; /* Fix the position to the viewport */
-    bottom: 0; /* Align to the bottom of the screen */
-    left: 0; /* Align to the left of the screen */
-    right: 0; /* Align to the right of the screen */
-    overflow-x: auto; /* Enable horizontal scrolling */
-    z-index: 100; /* Ensure it is above other content */
+	position:relative;
+	width:100%;
+	margin:auto;
+	overflow:hidden;
+	border:1px solid #000;
+  white-space: nowrap;
 }
 .table-wrap {
-  display: inline-block;
-	min-width:100%;
+	width:100%;
+	overflow:auto;
 }
 .table-scroll table {
-	width:100%;
+	width:max-content;
 	margin-top:auto;
 	border-collapse:separate;
 	border-spacing:0;
@@ -26,16 +26,6 @@
 }
 .table-scroll thead, .table-scroll tfoot {
 	background:#f9f9f9;
-}
-.main-table {
-    width: 100%; /* Ensure the table takes full width */
-    border-collapse: collapse; /* Collapse borders for better appearance */
-}
-.fixed-side {
-    position: sticky; /* Make the side columns sticky */
-    left: 0; /* Stick to the left */
-    background: #fff; /* Background color for sticky columns */
-    z-index: 10; /* Ensure it is above other content */
 }
 .clone {
 	position:absolute;
@@ -136,57 +126,121 @@ $comp=mysqli_fetch_array($sqlCompany);
         <table class="main-table">
             <thead>
                 <tr>
-                    <th colspan="3" align="center" class="fixed-side">Employee Information</th>
+                      <th colspan="3" align="center" class="fixed-side">
+                        Employee Information
+                      </th>
                     <?php
-                    // Generate date headers
-                    $month = date('m', strtotime($startdate));
-                    $year = date('Y', strtotime($startdate));
-                    $datearray = date('d', strtotime($enddate));
-                    for ($i = 1; $i <= $datearray; $i++) {
-                        echo "<th align='center' width='1.5%'>$i</th>";
+                      $month=date('m',strtotime($startdate));
+                      $year=date('Y',strtotime($startdate));
+
+                      $datearray=date('d',strtotime($enddate));
+                      for($i=1;$i<=$datearray;$i++){
+                        ?>
+                        <th align="center" width="1.5%"><?=$i;?></th>
+                        <?php
                     }
                     ?>
-                    <th width="1%" style="border-top:0; border-bottom:0;">&nbsp;</th>
-                    <th colspan="6">SUMMARY</th>
-                    <th width="1%" style="border-top:0; border-bottom:0;">&nbsp;</th>
-                    <th colspan="16">TOTAL</th>
+                      <th width="1%" style="border-top:0; border-bottom:0;">
+                        &nbsp;
+                      </th>
+                      <th colspan="6">
+                        SUMMARY
+                      </th>
+                      <th width="1%" style="border-top:0; border-bottom:0;">
+                        &nbsp;
+                      </th>
+                      <th colspan="16">
+                        TOTAL
+                      </th>
                 </tr>
                 <tr>
                     <th width="1%" style="vertical-align:middle;" class="fixed-side">No.</th>
-                    <th style="vertical-align:middle;" width="7%" class="fixed-side">Employee Name</th>
-                    <th style="vertical-align:middle;" width="4%" class="fixed-side">Department</th>
+                      <th  style="vertical-align:middle;" width="7%" class="fixed-side">Employee Name</th>
+                      <th  style="vertical-align:middle;" width="4%" class="fixed-side">Department</th>
                     <?php
-                    // Generate day headers
-                    for ($i = 1; $i <= $datearray; $i++) {
-                        $rundate = $year . "-" . $month . "-" . $i;
-                        $day = date('D', strtotime($rundate));
-                        echo "<th align='center' width='1.5%'>$day</th>";
+                      $month=date('m',strtotime($startdate));
+                      $year=date('Y',strtotime($startdate));
+
+                      $datearray=date('d',strtotime($enddate));
+                      for($i=1;$i<=$datearray;$i++){
+                        $rundate=$year."-".$month."-".$i;
+                        $day=date('D',strtotime($rundate));
+                        ?>
+                        <th align="center" width="1.5%"><?=$day;?></th>
+                        <?php
                     }
                     ?>
-                    <th width="1%" style="border-top:0; border-bottom:0;">&nbsp;</th>
-                    <th width="1%">A</th>
-                    <th width="1%">B</th>
-                    <th width="1%">C</th>
-                    <th width="1%">D</th>
-                    <th width="1%">E</th>
-                    <th width="1%">F</th>
-                    <th width="1%" style="border-top:0; border-bottom:0;">&nbsp;</th>
-                    <th width="1.5%" style="font-size:12px;">P</th>
-                    <th width="1.5%" style="font-size:12px;">CI</th>
-                    <th width="1.5%" style="font-size:12px;">PTO</th>
-                    <th width="1.5%" style="font-size:12px;">VL</th>
-                    <th width="1.5%" style="font-size:12px;">SL</th>
-                    <th width="1.5%" style="font-size:12px;">BLP</th>
-                    <th width="1.5%" style="font-size:12px;">EO</th>
-                    <th width="1.5%" style="font-size:12px;">SPL</th>
-                    <th width="1.5%" style="font-size:12px;">LTL</th>
-                    <th width="1.5%" style="font-size:12px;">MTL</th>
-                    <th width="1.5%" style="font-size:12px;">PTL</th>
-                    <th width="1.5%" style="font-size:12px;">SUS</th>
-                    <th width="1.5%" style="font-size:12px;">AWOL</th>
-                    <th width="1.5%" style="font-size:12px;">BL</th>
-                    <th width="1.5%" style="font-size:12px;">DO</th>
-                    <th width="1.5%" style="font-size:12px;">MDL</th>
+                      <th width="1%" style="border-top:0; border-bottom:0;">
+                        &nbsp;
+                      </th>
+                      <th width="1%">
+                        A
+                      </th>
+                      <th width="1%">
+                        B
+                      </th>
+                      <th width="1%">
+                        C
+                      </th>
+                      <th width="1%">
+                        D
+                      </th>
+                      <th width="1%">
+                        E
+                      </th>
+                      <th width="1%">
+                        F
+                      </th>
+                      <th width="1%" style="border-top:0; border-bottom:0;">
+                        &nbsp;
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        P
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        CI
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        PTO
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        VL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        SL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        BLP
+                      </th><th width="1.5%" style="font-size:12px;">
+                        EO
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        SPL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        LTL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        MTL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        PTL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        SUS
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        AWOL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        BL
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        DO
+                      </th>
+                      <th width="1.5%" style="font-size:12px;">
+                        MDL
+                      </th>
                 </tr>
             </thead>
             <tbody>
@@ -309,5 +363,5 @@ $comp=mysqli_fetch_array($sqlCompany);
                     ?>
                   </tbody>
                 </table>
-              </div>
-            </div>
+    </div>
+  </div>
