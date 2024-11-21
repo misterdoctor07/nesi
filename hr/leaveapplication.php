@@ -1,3 +1,130 @@
+
+<style>
+/* Modal Overlay to Blur Background */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* Modal Container */
+.modal-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    max-width: 90%;
+    z-index: 1000;
+}
+
+/* Panel Heading Styling */
+.panel-heading- {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+/* Close Button */
+.panel-heading- a {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Form Input and Button Styling */
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-group input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Change button color on hover */
+.form-group input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.modal-dialog {
+    width: auto; /* adjust the width to fit your content */
+    max-width: 500px; /* set a maximum width */
+}
+
+.modal-content {
+    width: 100%;
+    padding:0;
+    overflow-y: auto; /* add a scrollbar if the content is too long */
+}
+
+.modal-body form {
+    width: 300%; /* adjust the width to fit your content */
+    margin: 0 auto; /* center the form horizontally */
+}
+
+/* Panel Heading Styling */
+.panel-heading- {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Close Button */
+.panel-heading- a {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Form Input and Button Styling */
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-group input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Change button color on hover */
+.form-group input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.badge-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    color: white;
+    background-color: red;
+    border-radius: 50%;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+</style>
 <?php
     // Fetch unique companies from the employee_details table
     $sqlCompanies = mysqli_query($con, "SELECT DISTINCT company FROM employee_details ORDER BY company");
@@ -196,42 +323,6 @@
     </div>
 </div>
 
-<!-- Ensure Bootstrap JS and jQuery are included -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-<script>
-    // Select all buttons with the "confirm-action" class
-    const confirmButtons = document.querySelectorAll('.confirm-post');
-
-    // Loop through each button and add a click event listener
-    confirmButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            // Display the confirmation dialog
-            const confirmAction = confirm("Are you sure you want to POST this leave?");
-            
-            // If the user clicks "Cancel", prevent the link's default action
-            if (!confirmAction) {
-                event.preventDefault();
-            }
-        });
-    });
-
-    function filterTable(input) {
-        // Get the input field and table
-        const searchValue = input.value.toLowerCase();
-        const table = input.closest('.tab-pane').querySelector('table');
-        
-        // Loop through all table rows and hide those that don't match the search query
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
-            row.style.display = rowText.includes(searchValue) ? '' : 'none';
-        });
-    }
-</script>
-
 <?php
 if (isset($_GET['post'])) {
     $id = $_GET['id'];
@@ -420,130 +511,78 @@ if (isset($_POST['submitRemarks'])) {
 }
 ?>
 
-<style>
-/* Modal Overlay to Blur Background */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-}
+<!-- Ensure Bootstrap JS and jQuery are included -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-/* Modal Container */
-.modal-container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    max-width: 90%;
-    z-index: 1000;
-}
+<script>
+    $(document).ready(function() {
+    // Store active tab on click
+    $('.nav-tabs a').on('click', function() {
+        localStorage.setItem('activeTab', $(this).attr('href'));
+    });
 
-/* Panel Heading Styling */
-.panel-heading- {
-    text-align: left;
-    margin-bottom: 20px;
-}
+    // Retrieve active tab on page load
+    const activeTab = localStorage.getItem('activeTab');
+    if (activeTab) {
+        $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+    }
+});
+$(document).ready(function() {
+        // Store active main tab on click
+        $('.nav-tabs a').on('click', function() {
+            localStorage.setItem('activeMainTab', $(this).attr('href'));
+        });
 
-/* Close Button */
-.panel-heading- a {
-    color: #333;
-    text-decoration: none;
-}
+        // Retrieve active main tab on page load
+        const activeMainTab = localStorage.getItem('activeMainTab');
+        if (activeMainTab) {
+            $('.nav-tabs a[href="' + activeMainTab + '"]').tab('show');
+        }
 
-/* Form Input and Button Styling */
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
+        // Store active inner tab on click
+        $('.nav-pills a').on('click', function() {
+            const companyId = $(this).closest('.tab-pane').attr('id'); // Get the company tab ID
+            localStorage.setItem('activeInnerTab-' + companyId, $(this).attr('href'));
+        });
 
-.form-group input[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
-}
+        // Retrieve active inner tab on page load
+        $('.tab-pane').each(function() {
+            const companyId = $(this).attr('id');
+            const activeInnerTab = localStorage.getItem('activeInnerTab-' + companyId);
+            if (activeInnerTab) {
+                $('.nav-pills a[href="' + activeInnerTab + '"]').tab('show');
+            }
+        });
 
-/* Change button color on hover */
-.form-group input[type="submit"]:hover {
-    background-color: #0056b3;
-}
+        // Select all buttons with the "confirm-action" class
+        const confirmButtons = document.querySelectorAll('.confirm-post');
 
-.modal-dialog {
-    width: auto; /* adjust the width to fit your content */
-    max-width: 500px; /* set a maximum width */
-}
+        // Loop through each button and add a click event listener
+        confirmButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                // Display the confirmation dialog
+                const confirmAction = confirm("Are you sure you want to POST this leave?");
+                
+                // If the user clicks "Cancel", prevent the link's default action
+                if (!confirmAction) {
+                    event.preventDefault();
+                }
+            });
+        });
+    });
 
-.modal-content {
-    width: 100%;
-    padding:0;
-    overflow-y: auto; /* add a scrollbar if the content is too long */
-}
-
-.modal-body form {
-    width: 300%; /* adjust the width to fit your content */
-    margin: 0 auto; /* center the form horizontally */
-}
-
-/* Panel Heading Styling */
-.panel-heading- {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Close Button */
-.panel-heading- a {
-    color: #333;
-    text-decoration: none;
-}
-
-/* Form Input and Button Styling */
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.form-group input[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-/* Change button color on hover */
-.form-group input[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
-.badge-right {
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translate(50%, -50%);
-    color: white;
-    background-color: red;
-    border-radius: 50%;
-    padding: 4px 8px;
-    font-size: 12px;
-}
-</style>
-
+    function filterTable(input) {
+        // Get the input field and table
+        const searchValue = input.value.toLowerCase();
+        const table = input.closest('.tab-pane').querySelector('table');
+        
+        // Loop through all table rows and hide those that don't match the search query
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+            row.style.display = rowText.includes(searchValue) ? '' : 'none';
+        });
+    }
+</script>

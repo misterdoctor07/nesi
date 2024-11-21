@@ -1,7 +1,7 @@
 <style>
 .table-scroll {
 	position:relative;
-	max-width:100%;
+	width:100%;
 	margin:auto;
 	overflow:hidden;
 	border:1px solid #000;
@@ -103,6 +103,14 @@ $comp=mysqli_fetch_array($sqlCompany);
             <br />
             <br />
             <br />
+            <div style="float:left;">
+								<form action="attendancemonitoringsummarymissed.php" method="GET">
+									<input type="hidden" name="dept" value="<?=$dept;?>">
+									<input type="hidden" name="startdate" value="<?=$startdate;?>">
+									<input type="hidden" name="enddate" value="<?=$enddate;?>">
+									<input type="text" name="searchme"> <input type="submit" name="submit" value="Search"> <a href="attendancemonitoringsummarymissed.php?dept=<?=$dept;?>&startdate=<?=$startdate;?>&enddate=<?=$enddate;?>"><button type="button">Refresh</button></a>
+								</form>
+							</div><br><br>
             <div id="table-scroll" class="table-scroll">
             <div class="table-wrap">
                 <table class="main-table">
@@ -167,7 +175,20 @@ $comp=mysqli_fetch_array($sqlCompany);
                     <?php
                     $x=1;
                     mysqli_query($con,"SET NAMES 'utf8'");
-                      $sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep LEFT JOIN employee_details ed ON ed.idno=ep.idno WHERE ed.status NOT LIKE '%RESIGNED%' AND ed.company='$dept' ORDER BY ed.department ASC");
+                    if(isset($_GET['submit'])){
+											$dept=$_GET['dept'];
+											$startdate=$_GET['startdate'];
+											$enddate=$_GET['enddate'];
+											$searchme=$_GET['searchme'];
+											$sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep 
+                      LEFT JOIN employee_details ed ON ed.idno=ep.idno 
+                      WHERE ed.status NOT LIKE '%RESIGNED%' AND ed.company='$dept' AND (ep.lastname LIKE '%$searchme%' OR ep.firstname LIKE '%$searchme%') 
+                      ORDER BY ed.department ASC");
+										}else{
+											$sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep 
+                      LEFT JOIN employee_details ed ON ed.idno=ep.idno WHERE ed.status NOT LIKE '%RESIGNED%' AND ed.company='$dept' 
+                      ORDER BY ed.department ASC");
+										}
                       if(mysqli_num_rows($sqlEmployee)>0){
                         while($company=mysqli_fetch_array($sqlEmployee)){
                           $shift=date('h:i A',strtotime($company['startshift']))." - ".date('h:i A',strtotime($company['endshift']));
