@@ -1,67 +1,69 @@
 <style>
-.table-scroll {
-	position:relative;
-	width:100%;
-	margin:auto;
-	overflow:hidden;
-	border:1px solid #000;
-}
-.table-wrap {
-	width:100%;
-	overflow:auto;
-}
-.table-scroll table {
-	width:100%;
-	margin-top:auto;
-	border-collapse:separate;
-	border-spacing:0;
-}
-.table-scroll th, .table-scroll td {
-	padding:5px 10px;
-	border:1px solid #000;
-	background:#fff;
-	white-space:nowrap;
-	vertical-align:top;
-}
-.table-scroll thead, .table-scroll tfoot {
-	background:#f9f9f9;
-}
-.clone {
-	position:absolute;
-	top:0;
-	left:0;
-	pointer-events:none;
-}
-.clone th, .clone td {
-	visibility:hidden
-}
-.clone td, .clone th {
-	border-color:transparent
-}
-.clone tbody th {
-	visibility:visible;
-	color:red;
-}
-.clone .fixed-side {
-	border:1px solid #000;
-	background:#eee;
-	visibility:visible;
-}
-.clone thead, .clone tfoot{background:transparent;}
+  .table-scroll {
+    position:relative;
+    width:100%;
+    margin:auto;
+    overflow:hidden;
+    border:1px solid #000;
+  }
+  .table-wrap {
+    width:100%;
+    overflow:auto;
+  }
+  .table-scroll table {
+    width:100%;
+    margin-top:auto;
+    border-collapse:separate;
+    border-spacing:0;
+  }
+  .table-scroll th, .table-scroll td {
+    padding:5px 10px;
+    border:1px solid #000;
+    background:#fff;
+    white-space:nowrap;
+    vertical-align:top;
+  }
+  .table-scroll thead, .table-scroll tfoot {
+    background:#f9f9f9;
+  }
+  .clone {
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none;
+  }
+  .clone th, .clone td {
+    visibility:hidden
+  }
+  .clone td, .clone th {
+    border-color:transparent
+  }
+  .clone tbody th {
+    visibility:visible;
+    color:red;
+  }
+  .clone .fixed-side {
+    border:1px solid #000;
+    background:#eee;
+    visibility:visible;
+  }
+  .clone thead, .clone tfoot{background:transparent;}
 </style>
+
 <script src="lib/jquery/jquery.min.js"></script>
 <script>
-jQuery(document).ready(function() {
-   jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');
- });
+  jQuery(document).ready(function() {
+    jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');
+  });
 </script>
+
 <?php
-include('../config.php');
-$dept=$_GET["dept"];
-$startdate=$_GET['startdate'];
-$enddate=$_GET['enddate'];
-$sqlCompany=mysqli_query($con,"SELECT companyname FROM settings WHERE companycode='$dept'");
-$comp=mysqli_fetch_array($sqlCompany);
+  include('../config.php');
+  $dept=$_GET["dept"];
+  $startdate=$_GET['startdate'];
+  $enddate=$_GET['enddate'];
+  $sqlCompany=mysqli_query($con,"SELECT companyname FROM settings WHERE companycode='$dept'");
+  $comp=mysqli_fetch_array($sqlCompany);
 ?>
         <div class="col-lg-12">
             <div class="content-panel">
@@ -225,11 +227,11 @@ $comp=mysqli_fetch_array($sqlCompany);
                                   $l++;
                                   $remarks=str_replace('Code ','',$remarks)."-";
                                   $color="background-color:#f4c7c3;";
-                                }elseif($remarks=="Code ML"){
+                                }elseif($remarks=="Code I"){ //edited from Code ML
                                   $il++;
                                   $remarks=str_replace('Code ','',$remarks)."-";
                                   $color="background-color:#f4c7c3;";
-                                }elseif($remarks=="Code L-"){
+                                }elseif($remarks=="Code OB"){
                                     $l++;
                                     $remarks=str_replace('Code ','',$remarks)."-";
                                     $color="background-color:#f4c7c3;";

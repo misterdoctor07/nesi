@@ -85,7 +85,10 @@
     </script>
     <div class="row">
       <div class="col-lg-12">
-      <h4 style="text-indent: 10px;"><a href="?attendancemonitoring&view&company=<?=$comp;?>&startdate=<?=$startdate;?>&enddate=<?=$enddate;?>"><i class="fa fa-arrow-left"></i> BACK</a> | <i class="fa fa-money"></i> MANAGE TIME</h4>
+      <h4 style="text-indent: 10px;">
+        <a href="javascript:history.back();"><i class="fa fa-arrow-left"></i> BACK</a> | 
+        <i class="fa fa-money"></i> MANAGE TIME
+      </h4>
     </div>
     </div>
     <form class="form-horizontal style-form" method="GET" onSubmit="return SubmitDetails();">
@@ -196,10 +199,10 @@ if (isset($_GET['submit'])) {
 
   // Set time fields to NULL if the leave type is selected
   if (!empty($newLeaveType)) {
-      $loginam = '-';
-      $logoutam = '-';
-      $loginpm = '-';
-      $logoutpm = '-';
+      $loginam = '0';
+      $logoutam = '0';
+      $loginpm = '0';
+      $logoutpm = '0';
   } else {
       $loginam = $_GET['loginam'];
       $logoutam = $_GET['logoutam'];

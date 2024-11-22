@@ -344,15 +344,17 @@ $unreadCount = count($announcements); // Count unread announcements
 
         if ($logintype === 'loginam') {
             // Check if the employee has already logged in for AM
-    if ($attendanceRecord && $attendanceRecord['loginam'] !== '00:00:00') {
-        echo "<script>
-            document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
-            setTimeout(function() {
-                window.location='../attendance/';
-            }, 3000);
-        </script>";
-        exit;
-    }
+            // Assume $attendanceRecord is retrieved from the database
+            // Example: $attendanceRecord = mysqli_fetch_array($sqlAttendance);
+            if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceRecord['loginam'] !== 'null') {
+              echo "<script>
+                  document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
+                  setTimeout(function() {
+                      window.location='../attendance/';
+                  }, 3000);
+              </script>";
+              exit;
+            }
 
     // Determine if the employee has an 11 PM shift and if they are logging in between 12:00 AM and 1:00 AM
     $employeeStartShift = mysqli_fetch_array(mysqli_query($con, "SELECT startshift FROM employee_details WHERE idno='$empid'"))['startshift'];
@@ -369,6 +371,7 @@ $unreadCount = count($announcements); // Count unread announcements
 
     // Insert new attendance record if it doesn't exist
     if (!$attendanceRecord) {
+      // Set unused fields to "-" by default and insert a new record
         $status = ($employeeStartShift <= "04:00:00" || $employeeStartShift == "23:00:00") ? "nd/work" : "work";
         $sqlInsert = mysqli_query($con, "INSERT INTO attendance (idno, loginam, logindate, status, remarks) VALUES ('$empid', '$timenow', '$logindateAdjusted', '$status', '$remarks')");
     } else {
@@ -380,14 +383,14 @@ $unreadCount = count($announcements); // Count unread announcements
     </script>";
 }elseif ($logintype === 'logoutam') {
             // Check if the employee has already logged out for AM
-            if ($attendanceRecord && $attendanceRecord['logoutam'] !== '00:00:00') {
-                echo "<script>
-                    document.getElementById('remarksError').innerHTML = 'You have already logged out!';
-                    setTimeout(function() {
-                        window.location='../attendance/';
-                    }, 3000);
-                </script>";
-                exit;
+            if ($attendanceRecord && !empty($attendanceRecord['logoutam']) && $attendanceRecord['logoutam'] !== 'null') {
+              echo "<script>
+                  document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
+                  setTimeout(function() {
+                      window.location='../attendance/';
+                  }, 3000);
+              </script>";
+              exit;
             }
 
             // Retrieve the most recent attendance record for this employee
@@ -412,14 +415,14 @@ $unreadCount = count($announcements); // Count unread announcements
 
         } elseif ($logintype === 'loginpm') {
             // Check if the employee has already logged in for PM
-            if ($attendanceRecord && $attendanceRecord['loginpm'] !== '00:00:00') { 
-                echo "<script>
-                    document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
-                    setTimeout(function() {
-                        window.location='../attendance/';
-                    }, 3000);
-                </script>";
-                exit;
+            if ($attendanceRecord && !empty($attendanceRecord['loginpm']) && $attendanceRecord['loginpm'] !== 'null') {
+              echo "<script>
+                  document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
+                  setTimeout(function() {
+                      window.location='../attendance/';
+                  }, 3000);
+              </script>";
+              exit;
             }
 
             // Retrieve the most recent attendance record for this employee
@@ -444,14 +447,14 @@ $unreadCount = count($announcements); // Count unread announcements
 
         } elseif ($logintype === 'logoutpm') {
             // Check if the employee has already logged out for PM
-            if ($attendanceRecord && $attendanceRecord['logoutpm'] !== '00:00:00') {
-                echo "<script>
-                    document.getElementById('remarksError').innerHTML = 'You have already logged out today!';
-                    setTimeout(function() {
-                        window.location='../attendance/';
-                    }, 3000);
-                </script>";
-                exit;
+            if ($attendanceRecord && !empty($attendanceRecord['logoutpm']) && $attendanceRecord['logoutpm'] !== '0') {
+              echo "<script>
+                  document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
+                  setTimeout(function() {
+                      window.location='../attendance/';
+                  }, 3000);
+              </script>";
+              exit;
             }
 
             // Retrieve the most recent attendance record for this employee
@@ -626,4 +629,6 @@ function checkTime(i) {
 }
         </script>
 </body>
+
+</html>
 

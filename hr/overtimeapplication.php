@@ -344,7 +344,7 @@ if (isset($_GET['post'])) {
                 // Insert a new attendance row if the date doesn't exist
                 $sqlInsertAttendance = mysqli_query($con, 
                     "INSERT INTO attendance (idno, logindate, loginam, logoutam, loginpm, logoutpm, remarks) 
-                    VALUES ('$idno', '$otdate', '00:00:00', '00:00:00', '00:00:00', '00:00:00', 'ML')");
+                    VALUES ('$idno', '$otdate', '00:00:00', '00:00:00', '00:00:00', '00:00:00', 'OT')");
                 
                 if (!$sqlInsertAttendance) {
                     echo "<script>alert('Error inserting new attendance record for overtime date: $otdate');</script>";
