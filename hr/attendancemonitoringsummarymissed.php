@@ -48,6 +48,18 @@
     visibility:visible;
   }
   .clone thead, .clone tfoot{background:transparent;}
+  .btn {
+    padding: 10px 15px;
+    background-color: #13A14D;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #06753a;
+}
 </style>
 
 <script src="lib/jquery/jquery.min.js"></script>
@@ -55,6 +67,35 @@
   jQuery(document).ready(function() {
     jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');
   });
+
+  function tableToExcel(tableID, filename = '') {
+            var dataType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTML = tableSelect.outerHTML;
+
+            // Create a download link
+            var downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+
+            // Set the file name
+            filename = filename ? filename + '.xls' : 'attendance_summary.xls';
+
+            // Create a Blob with the table HTML
+            var blob = new Blob([tableHTML], {
+                type: dataType
+            });
+
+            // Create a URL for the Blob
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = filename;
+
+            // Trigger the download
+            downloadLink.click();
+
+            // Clean up
+            document.body.removeChild(downloadLink);
+        }
 </script>
 
 <?php
@@ -112,7 +153,17 @@
 									<input type="hidden" name="enddate" value="<?=$enddate;?>">
 									<input type="text" name="searchme"> <input type="submit" name="submit" value="Search"> <a href="attendancemonitoringsummarymissed.php?dept=<?=$dept;?>&startdate=<?=$startdate;?>&enddate=<?=$enddate;?>"><button type="button">Refresh</button></a>
 								</form>
-							</div><br><br>
+						</div>
+            <div style="float:right; margin-bottom: 20px;">
+                <form>
+                    <input type="hidden" name="dept" value="<?=$dept;?>">
+                    <input type="hidden" name="startdate" value="<?=$startdate;?>">
+                    <input type="hidden" name="enddate" value="<?=$enddate;?>">
+                    <button onclick="tableToExcel('attendanceTable', 'Attendance_Summary_Missed_Report')" class="btn btn-success">EXPORT TO EXCEL</button>
+                </form>
+            </div>
+              <br>
+              <br>
             <div id="table-scroll" class="table-scroll">
             <div class="table-wrap">
                 <table class="main-table">

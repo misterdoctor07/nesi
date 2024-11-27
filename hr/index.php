@@ -117,19 +117,19 @@ date_default_timezone_set("Asia/Manila");
               $row = mysqli_fetch_assoc($result);
               $leave_count = $row['total'];
           
-              // Count pending overtime applications
-              $query = "SELECT COUNT(*) AS total FROM overtime_application WHERE app_status != 'Pending' AND app_status != 'Cancelled' AND app_status != 'Disapproved' AND remarks != 'POSTED'";
-              $result = mysqli_query($con, $query);
-              $row = mysqli_fetch_assoc($result);
-              $overtime_count = $row['total'];
+              // // Count pending overtime applications
+              // $query = "SELECT COUNT(*) AS total FROM overtime_application WHERE app_status != 'Pending' AND app_status != 'Cancelled' AND app_status != 'Disapproved' AND remarks != 'POSTED'";
+              // $result = mysqli_query($con, $query);
+              // $row = mysqli_fetch_assoc($result);
+              // $overtime_count = $row['total'];
 
               // Count pending missed log applications for the same company
-              $query = "SELECT COUNT(*) AS total FROM missed_log_application WHERE applic_status != 'Pending' AND applic_status != 'Cancelled' AND applic_status != 'Disapproved' AND remarks != 'POSTED'";
+              $query = "SELECT COUNT(*) AS total FROM missed_log_application WHERE applic_status = 'Disapproved' AND remarks != 'POSTED'";
               $result = mysqli_query($con, $query);
               $row = mysqli_fetch_assoc($result);
               $missedlog_count = $row['total'];
 
-              $totalCount = $leave_count + $overtime_count + $missedlog_count;
+              $totalCount = $leave_count + $missedlog_count;
               ?>
 
 
@@ -150,11 +150,11 @@ date_default_timezone_set("Asia/Manila");
                     <span class="badge"><?php echo $leave_count; ?></span>
                   <?php } ?>
                 </a></li>
-                <li><a href="?overtimeapplication">Overtime Applications
+                <!-- <li><a href="?overtimeapplication">Overtime Applications
                   <?php if ($overtime_count > 0) { ?>
                     <span class="badge"><?php echo $overtime_count; ?></span>
                   <?php } ?>
-                </a></li>
+                </a></li> -->
                 <li><a href="?missedloginapplication">Missed Log Applications
                   <?php if ($missedlog_count > 0) { ?>
                     <span class="badge"><?php echo $missedlog_count; ?></span>

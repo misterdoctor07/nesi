@@ -39,7 +39,7 @@ if (isset($_GET['approved']) && isset($_GET['id'])) {
 if (isset($_GET['disapproved']) && isset($_GET['id'])) {
     $id = intval($_GET['id']); // Sanitize the ID
     $approval = "{$userDetails['lastname']} ({$userDetails['jobtitle']})";
-    $sqlUpdate = mysqli_query($con, "UPDATE missed_log_application SET applic_status='Disapproved - $approval' WHERE id='$id'");
+    $sqlUpdate = mysqli_query($con, "UPDATE missed_log_application SET applic_status='Disapproved' WHERE id='$id'");
 
     if ($sqlUpdate) {
         echo "<script>alert('Missed log application successfully disapproved!'); window.location='?managemissedlogapplication';</script>";
@@ -69,7 +69,9 @@ if (isset($_GET['disapproved']) && isset($_GET['id'])) {
                         <th style="text-align: center;">Reason</th>
                         <th width="10%" style="text-align: center;">Date and Time Applied</th>
                         <th width="10%" style="text-align: center;">Status</th>
-                        <th style="text-align: center;">Remarks</th>
+                        <th style="text-align: center;">HR Remarks</th>
+                        <th style="text-align: center;">Monitoring Remarks</th>
+                        <th style="text-align: center;">Approver Remarks</th>
                         <th width="6%" style="text-align: center;">Action</th>
                     </tr>
                 </thead>
@@ -134,6 +136,14 @@ if (isset($_GET['disapproved']) && isset($_GET['id'])) {
                                         $statusText = 'Disapproved';
                                     }
                                 }
+                                // Display remarks based on the user's designation
+                                if ($designation == '77') {
+                                    $remarksToShow = $company['monitoring_remarks'];
+                                } elseif ($designation == '31') {
+                                    $remarksToShow = $company['remarks'];
+                                } else {
+                                    $remarksToShow = $company['approver_remarks'];
+                                }
                                 echo "<tr>";
                                 echo "<td align='center'>$x.</td>";
                                 echo "<td align='center'>{$company['idno']}</td>";
@@ -147,19 +157,23 @@ if (isset($_GET['disapproved']) && isset($_GET['id'])) {
                                 echo "<td align='center'>" . date('m/d/Y', strtotime($company['date_applied'])) . " " . date('g:i:s A', strtotime($company['time_applied'])) . "</td>";
                                 echo "<td align='center'>$statusText</td>";
                                 echo "<td align='left'>{$company['remarks']}</td>";
+                                echo "<td align='left'>{$company['monitoring_remarks']}</td>";
+                                echo "<td align='left'>{$company['approver_remarks']}</td>";
                                 ?>
                                 <td align="center">
-                                    <a href="?managemissedlogapplication&id=<?= $company['mlid']; ?>&approved" class="btn btn-success btn-xs" title="Approve" 
-                                       onclick="return confirm('Do you wish to approve this missed log application?');">
-                                       <i class='fa fa-thumbs-up'></i>
-                                    </a>
-
-                                    <a href="?managemissedlogapplication&id=<?= $company['mlid']; ?>&disapproved" class="btn btn-danger btn-xs" title="Disapprove" 
-                                       onclick="return confirm('Do you wish to disapprove this missed log application?');">
-                                       <i class='fa fa-thumbs-down'></i>
-                                    </a>
+                                    <?php if ($appStatus === 'Pending') { ?>
+                                            <a href="?managemissedlogapplication&id=<?= $company['mlid']; ?>&approved" class="btn btn-success btn-xs" title="Approve" 
+                                            onclick="return confirm('Do you wish to approve this missed log application?');">
+                                            <i class='fa fa-thumbs-up'></i>
+                                            </a>
+                                            <a href="?managemissedlogapplication&id=<?= $company['mlid']; ?>&disapproved" class="btn btn-danger btn-xs" title="Disapprove" 
+                                            onclick="return confirm('Do you wish to disapprove this missed log application?');">
+                                            <i class='fa fa-thumbs-down'></i>
+                                            </a>
+                                    <?php } ?>
                                     <a href="?managemissedlogapplication&addremarks&id=<?=$company['mlid'];?>&remarks=<?=$company['remarks'];?>" class="btn btn-primary btn-xs" title="Remarks">
-                                        <i class='fa fa-edit'></i></a>
+                                        <i class='fa fa-edit'></i>
+                                    </a>
                                 </td>
 
                                 <?php
@@ -167,10 +181,10 @@ if (isset($_GET['disapproved']) && isset($_GET['id'])) {
                                 $x++;
                             }
                         } else {
-                            echo "<tr><td colspan='9' align='center'>No records found!</td></tr>";
+                            echo "<tr><td colspan='15' align='center'>No records found!</td></tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='9' align='center'>No records found for the requesting officers!</td></tr>";
+                        echo "<tr><td colspan='15' align='center'>No records found for the requesting officers!</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -217,8 +231,19 @@ if (isset($_POST['submitRemarks'])) {
     $id = $_POST['id'];
     $remarks = mysqli_real_escape_string($con, $_POST['remarks']); // Sanitize input
 
-    // Update remarks in the database
-    $sqlUpdateRemarks = "UPDATE missed_log_application SET remarks = '$remarks' WHERE id = '$id'";
+    // Determine which column to update based on designation
+    if ($designation == '77') {
+        // Store in monitoring_remarks
+        $sqlUpdateRemarks = "UPDATE missed_log_application SET monitoring_remarks = '$remarks' WHERE id = '$id'";
+    } elseif ($designation == '31') {
+        // Store in remarks
+        $sqlUpdateRemarks = "UPDATE missed_log_application SET remarks = '$remarks' WHERE id = '$id'";
+    } else {
+        // Store in approver_remarks
+        $sqlUpdateRemarks = "UPDATE missed_log_application SET approver_remarks = '$remarks' WHERE id = '$id'";
+    }
+
+    // Execute the update query
     if (mysqli_query($con, $sqlUpdateRemarks)) {
         echo "<script>alert('Remarks updated successfully.');</script>";
         echo "<script>window.location.href='?managemissedlogapplication';</script>"; // Redirect after update

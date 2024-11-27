@@ -114,7 +114,11 @@
                                             $shift = date('h:i A', strtotime($company['startshift'])) . " - " . date('h:i A', strtotime($company['endshift']));
                                             $datehired = date('m/d/Y', strtotime($company['dateofhired']));
                                             
-                                            $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance WHERE logindate BETWEEN '$startdate' AND '$enddate' AND idno='$company[idno]' ORDER BY logindate ASC");
+                                            $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance 
+                                            WHERE logindate BETWEEN '$startdate' AND '$enddate' 
+                                            AND idno = '$idn' 
+                                            AND (loginam >= '22:00:00' OR logoutpm <= '06:00:00')
+                                            ORDER BY logindate ASC");
                                             
                                             $login1 = "";
                                             $logout1 = "";
@@ -125,7 +129,7 @@
                                             $removepoint = "";
                                             
                                             if (mysqli_num_rows($sqlAttendance) > 0) {
-                                                $datearray = ""; // Initialize $datearray if not done before
+                                                // $datearray = ""; // Initialize $datearray if not done before
                                                 while ($attend = mysqli_fetch_array($sqlAttendance)) {
                                                     $idno = $company['idno'];
                                                     $datearray .= date('m/d/Y', strtotime($attend['logindate'])) . "<br>";
@@ -643,34 +647,34 @@
                                     // Also delete the associated points log
                                     $deletePoints = mysqli_query($con, "DELETE FROM points WHERE idno='$idno' AND logindate='$logindate'");
                         
-                                    echo "<script>alert('Item successfully removed!'); window.location='?attendancemonitoring&company=$company&startdate=$startdate&enddate=$enddate';</script>";
+                                    echo "<script>alert('Item successfully removed!'); window.history.back();</script>";
                                 } else {
-                                    echo "<script>alert('Unable to delete time!'); window.location='?attendancemonitoring&company=$company&startdate=$startdate&enddate=$enddate';</script>";
+                                    echo "<script>alert('Unable to delete time!'); window.history.back();</script>";
                                 }
                             } else {
-                                echo "<script>alert('Error retrieving remarks for the attendance record.'); window.location='?attendancemonitoring&company=$company&startdate=$startdate&enddate=$enddate';</script>";
+                                echo "<script>alert('Error retrieving remarks for the attendance record.'); window.history.back();</script>";
                             }
                         }
         
                         if(isset($_GET['deleteinfraction'])){
-                        $idno=$_GET['idno'];
-                        $id=$_GET['id'];
-                        $company=$_GET['company'];
-                        $startdate=$_GET['startdate'];
-                        $enddate=$_GET['enddate'];
-                        $logindate=$_GET['logindate'];
-                        $sqlDelete=mysqli_query($con,"DELETE FROM points WHERE id='$id'");
-                        if($sqlDelete){
-                            $sqlUpdate=mysqli_query($con,"UPDATE attendance SET remarks='P' WHERE logindate='$logindate' AND idno='$idno'");
-                        echo "<script>";
-                            echo "alert('Infraction successfully removed!');window.location='?attendancemonitoring&company=$company&startdate=$startdate&enddate=$enddate';";
-                        echo "</script>";
-                        }else{
-                        echo "<script>";
-                            echo "alert('Unable to remove infraction!');window.location='?attendancemonitoring&company=$company&startdate=$startdate&enddate=$enddate';";
-                        echo "</script>";
-                        }
-                        }
+                            $idno=$_GET['idno'];
+                            $id=$_GET['id'];
+                            $company=$_GET['company'];
+                            $startdate=$_GET['startdate'];
+                            $enddate=$_GET['enddate'];
+                            $logindate=$_GET['logindate'];
+                            $sqlDelete=mysqli_query($con,"DELETE FROM points WHERE id='$id'");
+                            if($sqlDelete){
+                              $sqlUpdate=mysqli_query($con,"UPDATE attendance SET remarks='P' WHERE logindate='$logindate' AND idno='$idno'");
+                            echo "<script>";
+                              echo "alert('Infraction successfully removed!');window.history.back();</script>";
+                            echo "</script>";
+                          }else{
+                            echo "<script>";
+                              echo "alert('Unable to remove infraction!');window.history.back();</script>";
+                            echo "</script>";
+                            }
+                          }
                 ?>
         </div>
     </div>

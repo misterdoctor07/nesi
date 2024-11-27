@@ -48,7 +48,45 @@
     background:#eee;
     visibility:visible;
   }
-  .clone thead, .clone tfoot{background:transparent;}
+  .tooltip {
+    position: relative;
+    cursor: pointer;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 100%;
+    background: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+.clone thead, .clone tfoot{background:transparent;}
+.btn {
+    padding: 10px 15px;
+    background-color: #13A14D;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #06753a;
+}
 </style>
 
 <script src="lib/jquery/jquery.min.js"></script>
@@ -56,6 +94,35 @@
   jQuery(document).ready(function() {
     jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');
   });
+
+  function tableToExcel(tableID, filename = '') {
+            var dataType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTML = tableSelect.outerHTML;
+
+            // Create a download link
+            var downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+
+            // Set the file name
+            filename = filename ? filename + '.xls' : 'attendance_summary.xls';
+
+            // Create a Blob with the table HTML
+            var blob = new Blob([tableHTML], {
+                type: dataType
+            });
+
+            // Create a URL for the Blob
+            var url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = filename;
+
+            // Trigger the download
+            downloadLink.click();
+
+            // Clean up
+            document.body.removeChild(downloadLink);
+        }
 </script>
 
 <?php
@@ -126,10 +193,19 @@
           <input type="text" name="searchme"> <input type="submit" name="submit" value="Search"> <a href="attendancemonitoringsummary.php?dept=<?=$dept;?>&startdate=<?=$startdate;?>&enddate=<?=$enddate;?>"><button type="button">Refresh</button></a>
         </form>
 		  </div>
+      <!-- Export Button -->
+      <div style="float:right; margin-bottom: 20px;">
+        <form>
+            <input type="hidden" name="dept" value="<?=$dept;?>">
+            <input type="hidden" name="startdate" value="<?=$startdate;?>">
+            <input type="hidden" name="enddate" value="<?=$enddate;?>">
+            <button onclick="tableToExcel('attendanceTable', 'Attendance_Summary_Report')" class="btn btn-success">EXPORT TO EXCEL</button>
+        </form>
+    </div>
       <br><br>
           <div id="table-scroll" class="table-scroll">
             <div class="table-wrap">
-              <table class="main-table">
+              <table class="main-table" id="attendanceTable" border="1">
                 <thead>
                   <tr>
                     <th colspan="3" align="center" class="fixed-side">
@@ -286,7 +362,7 @@
                             $year=date('Y',strtotime($startdate));
 
                             $datearray=date('d',strtotime($enddate));
-                            $a="";$b="";$c="";$d="";$e="";$f="";$p="";
+                            $a="";$b="";$c="";$d="";$e="";$f="";$p="";$pto="";$vl="";$sl="";$blp="";
                             for($i=1;$i<=$datearray;$i++){
                               $rundate=$year."-".$month."-".$i;
                               $day=date('D',strtotime($rundate));
@@ -298,43 +374,130 @@
                               // Fetch attendance record
                              $sqlAttendance = mysqli_query($con, " SELECT a.*, o.* FROM attendance a LEFT JOIN points o ON a.idno = o.idno  WHERE a.logindate = '$rundate' AND a.idno = '{$company['idno']}'");
                              if (mysqli_num_rows($sqlAttendance) > 0) {
-                                                           $rem = mysqli_fetch_array($sqlAttendance);
+                                 $rem = mysqli_fetch_array($sqlAttendance);
                                  $previousRemarks = $rem['previousRemarks']; // Get previous remarks from the database
                                  $remarks = $rem['remarks'];                 // Current remarks from the database
                                  $offense = $rem['offense']; // Category of the offense (e.g. TARDY, ABSENT, etc.)
                                  $color = "";
 
                                  if ($offense == "15") {
-                                   $remarks = date('h:i', strtotime($rem['loginam'])) . "-" . str_replace('', '',"D" );
-                                   $color = "background-color:#ffcccc"; // Late category could have a different color
-                                 } elseif (in_array($remarks, ["Code A", "Code B", "Code C"])) {
-                                     $newRemark = "CI-" . str_replace('Code ', '', $remarks);
-                                     $color = "background-color:#ffe598;";
-                                 } elseif (in_array($remarks, ["Code L", "Code I", "Code OB"])) {
-                                     $newRemark = "P";
-                                     $p++;
-                                     $color = "";
-                                 } elseif (in_array($remarks, ["PTO", "VL", "SL", "BLP"])) {
-                                     $newRemark = ($remarks == "SL") ? "SL-A" : $remarks;
-                                     $color = "background-color:#bdd6ee;";
-                                 } else {
-                                     $newRemark = $remarks; // Default to the current remarks if no condition matches
-                                 }
-                                                             
-                                                             // Update the previousRemarks column if current remarks have changed
-                                                             if ($previousRemarks !== $remarks) {
-                                     mysqli_query($con, "UPDATE attendance 
-                                                         SET previousRemarks='$remarks', remarks='$newRemark' 
-                                                         WHERE logindate='$rundate' AND idno='{$company['idno']}'");
-                                     $remarks = $newRemark; // Update the local variable to the new remark
-                                 }
+                                  $remarks = date('h:i', strtotime($rem['loginam'])) . "-" . str_replace('', '',"D" );
+                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                                  $d++;
+                                } 
+                                  elseif ($offense == "17") {
+                                  $remarks = date('h:i', strtotime($rem['loginam'])) . "-" . str_replace('', '',"F" );
+                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                                  $f++;
+                                }
+                                elseif ($offense == "12") {
+                                  $remarks = "CI" . "-" . str_replace('', '',"A" );
+                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                                  $a++;
+                                }
+                                elseif ($offense == "13") {
+                                  $remarks = "CI" . "-" . str_replace('', '',"B" );
+                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                                  $b++;
+                                }
+                                elseif ($offense == "63") {
+                                  $remarks = "CI" . "-" . str_replace('', '',"C" );
+                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                                  $c++;
+                                }
+                             elseif (in_array($remarks, ["Code L", "Code I", "Code OB"])) {
+                                    $remarks = "P";
+                                    $color = "";
+                                } elseif (in_array($remarks, ["PTO", "VL", "SL", "BLP", "AWOL", "CI-A", "CI"])) {
+                                  // Determine the new remark for "SL"
+                                  $remarks = ($remarks == "SL") ? "SL-A" : $remarks;
+                              
+                                  // Increment the appropriate counter
+                                  if ($remarks == "PTO") {
+                                      $pto++;
+                                  } elseif ($remarks == "VL") {
+                                      $vl++;
+                                  } elseif ($remarks == "SL") {
+                                      $sl++; // Increment SL-A counter for converted SL
+                                  } elseif ($remarks == "BLP") {
+                                      $blp++;
+                                  } 
+                              
+                                  // Set color based on remark
+                                  $color = "background-color:#bdd6ee;";
+                              } else {
+                                $newRemark = $remarks; // Default to the current remarks if no condition matches
+                                }
+                                $previousRemarks = $rem['previousRemarks'];                       
+                                                            // Update the previousRemarks column if current remarks have changed
+                              if ($previousRemarks !== $remarks) {
+                                    mysqli_query($con, "UPDATE attendance 
+                                                        SET previousRemarks='$remarks', remarks='$newRemark' 
+                                                        WHERE logindate='$rundate' AND idno='{$company['idno']}'");
+                                    $remarks = $newRemark; // Update the local variable to the new remark
+                                }
                              } else {
                                  // If no record is found, initialize variables
-                                                             $remarks = "";
-                                                     $previousRemarks = "";
-                                 $color = "";
-                                                           }
-                  ?>
+                                $remarks = "";
+                                $previousRemarks = "";
+                                $color = "";
+                                }
+                                if ($remarks === "P") {
+                                  $p++; // Increment for general "P"
+                                }
+                   /// Fetch attendance for the specific date and employee
+                   $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance WHERE logindate='$rundate' AND idno='{$company['idno']}'");
+
+                   if (mysqli_num_rows($sqlAttendance) > 0) {
+                       $attendance = mysqli_fetch_assoc($sqlAttendance);
+                       $remark = $attendance['remarks'];        // Current remark in attendance (VL, SL, etc.)
+                       $loginam = $attendance['loginam'];
+                       $logoutam = $attendance['logoutam'];
+                       $loginpm = $attendance['loginpm'];
+                       $logoutpm = $attendance['logoutpm'];
+
+                       // Check if the initial remark is a leave type and any login/logout field is filled
+                       if (in_array($remark, ['VL', 'SL', 'PTO', 'EO', 'BLP', 'SPL']) && 
+                           ($loginam != '0' || $logoutam != '0' || $loginpm != '0' || $logoutpm != '0
+                           ')) {
+                             $sqlUpdateRemarks = mysqli_query($con, " UPDATE attendance SET remarks = 'P', status = 'nd/work' WHERE logindate = '$rundate' AND idno = '{$company['idno']}'");
+
+                           // Restore the leave credits based on the leave type
+                           if ($remark == "VL") {
+                               $sqlUpdateCredits = mysqli_query($con, "
+                                   UPDATE leave_credits 
+                                   SET vlused = vlused + 1 
+                                   WHERE idno = '{$company['idno']}'");
+                           } elseif ($remark == "SL") {
+                               $sqlUpdateCredits = mysqli_query($con, "
+                                   UPDATE leave_credits 
+                                   SET slused = slused + 1 
+                                   WHERE idno = '{$company['idno']}'");
+                           }elseif ($remark == "PTO") {
+                             $sqlUpdateCredits = mysqli_query($con, "
+                                 UPDATE leave_credits 
+                                 SET ptoused = ptoused + 1 
+                                 WHERE idno = '{$company['idno']}'");
+                           }elseif ($remark == "EO") {
+                             $sqlUpdateCredits = mysqli_query($con, "
+                                 UPDATE leave_credits 
+                                 SET eo_used = eo_used + 1 
+                                 WHERE idno = '{$company['idno']}'");
+                           }elseif ($remark == "BLP") {
+                             $sqlUpdateCredits = mysqli_query($con, "
+                                 UPDATE leave_credits 
+                                 SET blp_used = blp_used + 1 
+                                 WHERE idno = '{$company['idno']}'");
+                           }elseif ($remark == "SPL") {
+                             $sqlUpdateCredits = mysqli_query($con, "
+                                 UPDATE leave_credits 
+                                 SET spl_used = spl_used + 1 
+                                 WHERE idno = '{$company['idno']}'");
+                           }
+                          
+                       }
+                   }
+                   ?>
                   <td align="center" 
                     class="tooltip" 
                     style="font-size:10px; font-weight:bold; <?= $nowork; ?> <?= $color; ?>" 
@@ -345,19 +508,19 @@
                   <?php
                       }
                           echo "<td style='border-top:0; border-bottom:0;'></td>";
-                          echo "<td align='center'></td>";
-                          echo "<td align='center'></td>";
-                          echo "<td align='center'></td>";
+                          echo "<td align='center'>$a</td>";
+                          echo "<td align='center'>$b</td>";
+                          echo "<td align='center'>$c</td>";
                           echo "<td align='center'>$d</td>";
                           echo "<td align='center'>$e</td>";
                           echo "<td align='center'>$f</td>";
                           echo "<td style='border-top:0; border-bottom:0;'></td>";
                           echo "<td align='center'>$p</td>";
                           echo "<td align='center'></td>";
-                          echo "<td align='center'></td>";
-                          echo "<td align='center'></td>";
-                          echo "<td align='center'></td>";
-                          echo "<td align='center'></td>";
+                          echo "<td align='center'>$pto</td>";
+                          echo "<td align='center'>$vl</td>";
+                          echo "<td align='center'>$sl</td>";
+                          echo "<td align='center'>$blp</td>";
                           echo "<td align='center'></td>";
                           echo "<td align='center'></td>";
                           echo "<td align='center'></td>";

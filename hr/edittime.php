@@ -180,6 +180,9 @@
                       <option value="BLP" required> Birthday Leave (BLP)</option>
                       <option value="EO" required> Early Out (EO) </option>
                       <option value="EEO" required> Emergency Early Out Leave (EEO)</option>
+                      <option value="AWOL" required> AWOL</option>
+                      <option value="CI-A" required> Absent - No Med Cert </option>
+                      <option value="CI" required> Absent - with Med Cert</option>
                     </select>
                   </div>
                 </div>
@@ -199,16 +202,18 @@ if (isset($_GET['submit'])) {
 
   // Set time fields to NULL if the leave type is selected
   if (!empty($newLeaveType)) {
-      $loginam = '0';
-      $logoutam = '0';
-      $loginpm = '0';
-      $logoutpm = '0';
-  } else {
-      $loginam = $_GET['loginam'];
-      $logoutam = $_GET['logoutam'];
-      $loginpm = $_GET['loginpm'];
-      $logoutpm = $_GET['logoutpm'];
-  }
+    // Check if the values exist and are not empty; otherwise, set them to '0'
+    $loginam = !empty($_GET['loginam']) ? $_GET['loginam'] : '0';
+    $logoutam = !empty($_GET['logoutam']) ? $_GET['logoutam'] : '0';
+    $loginpm = !empty($_GET['loginpm']) ? $_GET['loginpm'] : '0';
+    $logoutpm = !empty($_GET['logoutpm']) ? $_GET['logoutpm'] : '0';
+} else {
+    // Assign the provided values directly
+    $loginam = isset($_GET['loginam']) ? $_GET['loginam'] : '0';
+    $logoutam = isset($_GET['logoutam']) ? $_GET['logoutam'] : '0';
+    $loginpm = isset($_GET['loginpm']) ? $_GET['loginpm'] : '0';
+    $logoutpm = isset($_GET['logoutpm']) ? $_GET['logoutpm'] : '0';
+}
 
   // Ensure that status is properly formatted
   if (!empty($newStatus)) {

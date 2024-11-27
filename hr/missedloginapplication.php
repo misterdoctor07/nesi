@@ -103,7 +103,7 @@ if (!$sqlCompanies) {
                     $sqlCount = mysqli_query($con, "SELECT COUNT(*) AS total FROM missed_log_application ml
                         INNER JOIN employee_details ed ON ml.idno = ed.idno
                         WHERE ed.company = '$companyCode'
-                        AND ml.applic_status NOT IN ('Pending', 'Cancelled', 'Disapproved')
+                        AND ml.applic_status = 'Disapproved'
                         AND ml.remarks != 'POSTED'"); 
                     $count = mysqli_fetch_assoc($sqlCount)['total'];
                     
@@ -145,7 +145,7 @@ if (!$sqlCompanies) {
                             INNER JOIN department d ON d.id = ed.department
                             WHERE ed.company = '$companyCode' 
                             AND d.department = '$departmentName'
-                            AND ml.applic_status NOT IN ('Pending', 'Cancelled', 'Disapproved') 
+                            AND ml.applic_status = 'Disapproved'
                             AND ml.remarks != 'POSTED'");
                         $deptCount = mysqli_fetch_assoc($sqlDeptCount)['total'];
 
@@ -182,7 +182,7 @@ if (!$sqlCompanies) {
                             WHERE ed.company = '$companyCode' AND d.department = '$departmentName' 
                             ORDER BY 
                                 CASE 
-                                    WHEN ml.applic_status NOT IN ('Pending', 'Cancelled', 'Disapproved') AND ml.remarks != 'POSTED' THEN 1 
+                                    WHEN ml.applic_status = 'Disapproved' AND ml.remarks != 'POSTED' THEN 1 
                                     ELSE 2 
                                 END,
                             ml.time_applied DESC");
@@ -208,7 +208,9 @@ if (!$sqlCompanies) {
                                 <th style="text-align: center;">Reason</th>
                                 <th width="10%" style="text-align: center;">Date and Time Applied</th>
                                 <th width="10%" style="text-align: center;">Status</th>
-                                <th style="text-align: center;">Remarks</th>
+                                <th style="text-align: center;">HR Remarks</th>
+                                <th style="text-align: center;">Monitoring Remarks</th>
+                                <th style="text-align: center;">Approver Remarks</th>
                                 <th width="6%" style="text-align: center;">Action</th>
                             </tr>
                         </thead>
@@ -237,27 +239,32 @@ if (!$sqlCompanies) {
                                     <td align='center'><?= date('m/d/Y', strtotime($emp['date_applied'])) . " " . date('g:i:s A', strtotime($emp['time_applied'])); ?></td>
                                     <td align='center'><?= $emp['applic_status'] ?></td>
                                     <td align='left'><?= $emp['remarks'] ?></td>
+                                    <td align='left'><?= $emp['monitoring_remarks'] ?></td>
+                                    <td align='left'><?= $emp['approver_remarks'] ?></td>
                                     <td align="center">
-                                        <?php if ($emp['remarks'] != 'POSTED'): ?>
-                                            <?php if ($emp['applic_status'] != 'Disapproved' && $emp['applic_status'] != 'Cancelled' && $emp['applic_status'] != 'Pending'): ?>
-                                                <a href="?missedloginapplication&post&id=<?=$emp['mlid'];?>&remarks=<?=$emp['remarks'];?>" 
-                                                   class="btn btn-success btn-xs confirm-post" 
-                                                   title="Post">
-                                                    <i class='fa fa-upload'></i>
-                                                </a>
-                                            <?php endif; ?>
-                                            <a href="?missedloginapplication&addremarks&id=<?=$emp['mlid'];?>&remarks=<?=$emp['remarks'];?>" 
-                                               class="btn btn-primary btn-xs"
-                                               title="Remarks">
-                                                <i class='fa fa-edit'></i>
+                                        <?php if ($emp['remarks'] != 'POSTED' && $emp['remarks'] != 'NULL/VOID' && $emp['applic_status'] == 'Disapproved'): ?>
+                                            <a href="?missedloginapplication&post&id=<?=$emp['mlid'];?>&remarks=<?=$emp['remarks'];?>" 
+                                            class="btn btn-success btn-xs confirm-post" 
+                                            title="Post">
+                                                <i class='fa fa-upload'></i>
+                                            </a>
+                                            <a href="?missedloginapplication&null&id=<?=$emp['mlid'];?>&remarks=<?=$emp['remarks'];?>" 
+                                            class="btn btn-danger btn-xs confirm-null"
+                                            title="Void/Null">
+                                                <i class='fa fa-remove'></i>
                                             </a>
                                         <?php endif; ?>
+                                            <a href="?missedloginapplication&addremarks&id=<?=$emp['mlid'];?>&remarks=<?=$emp['remarks'];?>" 
+                                            class="btn btn-primary btn-xs"
+                                            title="Remarks">
+                                                <i class='fa fa-edit'></i>
+                                            </a>
                                     </td>
                                 </tr>
                                 <?php
                             }
                         } else {
-                            echo "<tr><td colspan='13' align='center'>No records found!</td></tr>";
+                            echo "<tr><td colspan='15' align='center'>No records found!</td></tr>";
                         }
                         ?>
                         </tbody>
@@ -276,6 +283,7 @@ if (!$sqlCompanies) {
 </div>
 
 <?php 
+//Post Logic
 if (isset($_GET['post'])) {
     $id = mysqli_real_escape_string($con, $_GET['id']);
     
@@ -317,6 +325,12 @@ if (isset($_GET['post'])) {
     } else {
         echo "<script>alert('Unable to post missed log application!'); window.location='?missedloginapplication';</script>";
     }
+}
+
+//Null/Void Logic
+if (isset($_GET['null'])) {
+    $id = mysqli_real_escape_string($con, $_GET['id']);
+    $sqlUpdateMissedLog = mysqli_query($con, "UPDATE missed_log_application SET remarks='NULL/VOID' WHERE id='$id'");
 }
 
 // Check if the user clicked 'Add Remarks'
@@ -418,7 +432,23 @@ $(document).ready(function() {
         confirmButtons.forEach(button => {
             button.addEventListener('click', function(event) {
                 // Display the confirmation dialog
-                const confirmAction = confirm("Are you sure you want to POST this leave?");
+                const confirmAction = confirm("Are you sure you want to POST this missed log?");
+                
+                // If the user clicks "Cancel", prevent the link's default action
+                if (!confirmAction) {
+                    event.preventDefault();
+                }
+            });
+        });
+
+        // Select all buttons with the "confirm-null" class
+        const confirmNullButtons = document.querySelectorAll('.confirm-null');
+
+        // Loop through each button and add a click event listener
+        confirmNullButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                // Display the confirmation dialog
+                const confirmAction = confirm("Are you sure you want to VOID/NULL this missed log?");
                 
                 // If the user clicks "Cancel", prevent the link's default action
                 if (!confirmAction) {
