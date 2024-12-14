@@ -1,3 +1,4 @@
+
 <?php
           $id=$_SESSION['idno'];
 
@@ -95,7 +96,11 @@
             $fulltime="";
           }
 
-          $sqlReferral=mysqli_query($con,"SELECT ep.lastname,ep.firstname,er.effectivity FROM employee_referral er LEFT JOIN employee_profile ep ON ep.idno=er.referredby WHERE er.idno='$idno'");
+          $sqlReferral=mysqli_query($con,"SELECT ep.lastname,ep.firstname,er.effectivity 
+          FROM employee_referral er 
+          LEFT JOIN employee_profile ep ON ep.idno=er.referredby
+          WHERE er.idno='$idno'");
+
           if(mysqli_num_rows($sqlReferral)>0){
             $referral=mysqli_fetch_array($sqlReferral);
             $referredby=$referral['firstname']." ".$referral['lastname'];
@@ -104,7 +109,7 @@
             $referredby="";
             $effectivity="";
           }
-          $dhire=new DateTime($details['dateofregular']);
+          $dhire=new DateTime($details['dateofhired']);
           $dnow=new DateTime(date('Y-m-d'));
           $interval=$dhire->diff($dnow);
           $years=$interval->y;
@@ -126,11 +131,14 @@
             $bdayused=$leave['blp_used']??0;
             $earlyout=$leave['earlyout']??0;
             $eo_used=$leave['eo_used']??0;
+            $spl=$leave['spl']??0;
+            $splused=$leave['spl_used']??0;
             $vlrem=$vl-$vlused;
             $slrem=$sl-$slused;
             $ptorem=$pto-$ptoused;
             $blprem=$bday-$bdayused;
             $eorem=$earlyout-$eo_used;
+            $splrem=$spl-$splused;
           }else{
             $vl="";
             $vlused="";
@@ -147,8 +155,21 @@
             $ptorem="";
             $blprem="";
             $eorem="";
+            $spl="";
+            $splused="";
           }
+          $sqlPoints = mysqli_query($con, "SELECT SUM(points) as total_points FROM points WHERE idno='$idno'");
+if (mysqli_num_rows($sqlPoints) > 0) {
+    $point = mysqli_fetch_array($sqlPoints);
+    $points = $point['total_points'] ?? 0; // Default to 0 if no points
+} else {
+    $points = 0; // Default to 0 if no records found
+}
+
+// Format points to 1 decimal place
+$points = number_format((float)$points, 1, '.', '');
           ?>
+        
           <div class="col-lg-12 mt">
             <div class="row content-panel">
               <div class="col-md-4 profile-text mt mb centered">
@@ -166,61 +187,94 @@
                 <h3><?=$empname;?></h3>
                 <h6><?=$designation;?></h6>
                 <p><?=$companyname;?></p>
+                
+              
+
+                           
                 <br>
-                <p>&nbsp;</p>
+
+                <p style="color:red; font-size: 16px;">  <tr >
+    <td width="100%">Points:</td>
+    <td><?=$points;?></td>
+</tr></p>
               </div>
               <!-- /col-md-4 -->
               <?php
-          if (isset($_POST['submit'])) {
-            $idno = $_POST['idno']; // User's ID
-            $target_dir = "../Employees/";
-        
-            // Handle file upload
-            if (!empty($_FILES['profile_pic']['name'])) {
-                $file_ext = strtolower(pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION));
-                $target_file = $target_dir . $idno . "." . $file_ext;
-        
-                // Check if it's a valid image file (you can extend this)
-                $valid_extensions = array("jpg", "png", "jpeg");
-                if (in_array($file_ext, $valid_extensions)) {
-                    // Upload the file
-                    if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
-                        $image = $target_file;
+            
+             // Check if the form is submitted
+             
+             if (isset($_POST['submit'])) {
+                $idno = $_POST['idno']; // User's ID
+                $target_dir = "../Employees/";
+            
+                // Handle file upload
+                if (!empty($_FILES['profile_pic']['name'])) {
+                    $file_ext = strtolower(pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION));
+                    $target_file = $target_dir . $idno . "." . $file_ext;
+            
+                    // Check if it's a valid image file (you can extend this)
+                    $valid_extensions = array("jpg", "png", "jpeg");
+                    if (in_array($file_ext, $valid_extensions)) {
+                        // Check if temporary file exists and is readable
+                        if (file_exists($_FILES['profile_pic']['tmp_name']) && is_readable($_FILES['profile_pic']['tmp_name'])) {
+                            // Delete existing profile picture
+                            $existing_files = glob($target_dir . $idno . ".*");
+                            foreach ($existing_files as $existing_file) {
+                                unlink($existing_file);
+                            }
+            
+                            // Upload the new file
+                            if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
+                                $image = $target_file;
+                            } else {
+                                $error = "Error uploading file.";
+                                error_log("Failed to move uploaded file: " . $_FILES['profile_pic']['tmp_name']);
+                            }
+                        } else {
+                            $error = "Temporary file not found or not readable.";
+                            error_log("Temporary file issue: " . $_FILES['profile_pic']['tmp_name']);
+                        }
                     } else {
-                        $error = "Error uploading file.";
+                        $error = "Invalid file format. Only JPG, JPEG, and PNG allowed.";
                     }
                 } else {
-                    $error = "Invalid file format. Only JPG, JPEG, and PNG allowed.";
+                    $error = "No file selected.";
                 }
             } else {
-                $error = "No file selected.";
+                // Default image if no file is uploaded
+                if (file_exists("../Employees/".$idno.".png")) {
+                    $image = "../Employees/".$idno.".png";
+                } elseif (file_exists("../Employees/".$idno.".jpg")) {
+                    $image = "../Employees/".$idno.".jpg";
+                } else {
+                    $image = "path/to/default/image.jpg"; // Default image if no profile pic exists
+                }
             }
-        } else {
-            // Default image if no file is uploaded
-            if (file_exists("../Employees/".$idno.".png")) {
-                $image = "../Employees/".$idno.".png";
-            } elseif (file_exists("../Employees/".$idno.".jpg")) {
-                $image = "../Employees/".$idno.".jpg";
-            } else {
-                $image = "path/to/default/image.jpg"; // Default image if no profile pic exists
-            }
-        }
-        ?>
-  <div class="col-md-4 centered">
-<div class="profile-pic">
-   <form method="POST" enctype="multipart/form-data">
-       <p><img src="<?= $image; ?>" class="img-circle" alt="Profile Picture"></p>
-       <p><?= $idno; ?></p>
-       <div style="display: flex; justify-content: center; align-items: center; gap: -20px;">
-           <input type="hidden" name="idno" value="<?= $idno; ?>">
-           <input type="file" name="profile_pic" required style="flex: 0;">
-           <button type="submit" name="submit" class="btn btn-theme" style="flex: 0.5; padding: 1px 0;"><i class="fa fa-upload"></i> Upload</button>
-       </div>
-   </form>
-   <?php if (isset($error)) { echo "<p class='error'>$error</p>"; } ?>
-</div>
+             ?>
+             
+             <div class="col-md-4 centered" >
+    <div class="profile-pic " >
+        <form method="POST" enctype="multipart/form-data">
+            <div class="profile-pic-container" >
+                <img  src="<?= $image; ?>" class="img-circle clickable"  alt="Profile Picture" onclick="document.getElementById('profile_pic').click();">
+                
+                <div class="camera-icon">
+                    <i class="fa fa-camera" aria-hidden="true"></i>
+                </div>
+            </div>
+            <p><?= $idno; ?></p>
+            <input type="hidden" name="idno" value="<?= $idno; ?>">
+            <input type="file" name="profile_pic" id="profile_pic" style="display: none;">
+            <button type="submit" name="submit" style="font-size: 10px; padding: 2px 5px;">Upload</button>
+            <?php if (isset($error)) { echo "<p class='error'>$error</p>"; } ?>
+        </form>
+    </div>
 </div>
 
+
+
+
+             
               <!-- /col-md-4 -->
             </div>
             <!-- /row -->
@@ -229,17 +283,17 @@
           <div class="col-lg-12 mt">
             <div class="row content-panel">
               <div class="panel-heading">
-                
-                  
-                    <h1 style="color: #48cfad; text-align: center; font-weight:900">OVERVIEW</h1>
-                  
+                <ul class="nav nav-tabs nav-justified">
+                  <li class="active">
+                    <a data-toggle="tab" href="#overview">Overview</a>
+                  </li>
                   <!-- <li>
                     <a data-toggle="tab" href="#contact" class="contact-map">Contact</a>
                   </li>
                   <li>
                     <a data-toggle="tab" href="#edit">Edit Profile</a>
                   </li> -->
-                
+                </ul>
               </div>
               <!-- /panel-heading -->
               <div class="panel-body">
@@ -286,6 +340,7 @@
                                     <td width="15%">Department:</td>
                                     <td><?=$department;?></td>
                                 </tr>
+                                
                                 <tr>
                                     <td width="15%">Status:</td>
                                     <td><?=$status;?></td>
@@ -307,7 +362,7 @@
                             <table width="100%">
                               <tr>
                                   <td width="15%">LC Effectivity:</td>
-                                    <td><?=$eligible;?></td>
+                                  <td><?=$eligible;?></td>
                               </tr>
                                 <tr>
                                     <td width="25%">Life Insurance Effectivity:</td>
@@ -365,15 +420,15 @@
                             <table width="100%">
                                 <tr>
                                     <td width="25%">Probationary:</td>
-                                    <td><?=$probationary;?></td>
+                                    <td><?=$datehired;?></td>
                                 </tr>
                                 <tr>
                                     <td width="15%">Regular:</td>
-                                    <td><?=$regular;?></td>
+                                    <td><?=$dateregular?></td>
                                 </tr>
                                 <tr>
                                     <td width="15%">Full-Time:</td>
-                                    <td><?=$fulltime;?></td>
+                                    <td><?=$datefulltime;?></td>
                                 </tr>
                             </table>
                         </div>
@@ -396,8 +451,7 @@
                         <!-- /detailed -->
                       </div>
                       <!-- /col-md-6 -->
-                      <div class="col-md-6">
-                        <div class="detailed">
+                      <div class="col-md-6 detailed">
                         <h4>Leave Credits</h4>
                         <div class="col-lg-12">
                             <table width="100%">
@@ -423,9 +477,7 @@
                                 </tr>
                             </table>
                         </div>
-                        </div>
-                        <div class="col-md-4">
-                        <div class="detailed" style="margin-top:18px">
+                        <div class="col-md-4 detailed">
                         <h4>Vacation Leave Credits</h4>
                         <div class="col-lg-12">
                             <table width="100%">
@@ -443,9 +495,8 @@
                                 </tr>
                             </table>
                         </div>
-                        </div>
                       </div>
-                      <div class="col-md-4 detailed" style="margin-top:8px">
+                      <div class="col-md-4 detailed">
                         <h4>Sick Leave Credits</h4>
                         <div class="col-lg-12">
                             <table width="100%">
@@ -464,7 +515,7 @@
                             </table>
                         </div>
                       </div>
-                      <div class="col-md-4 detailed" style="margin-top:8px; position: left;">
+                      <div class="col-md-4 detailed">
                         <h4>PTO Credits</h4>
                         <div class="col-lg-12">
                             <table width="100%">
@@ -482,7 +533,10 @@
                                 </tr>
                             </table>
                         </div>
+                        
                       </div>
+                      
+                      
                       <div class="col-md-4 detailed" style="margin-top:10px">
                         <h4>BLP Credits</h4>
                         <div class="col-lg-12">
@@ -520,7 +574,30 @@
                                 </tr>
                             </table>
                         </div>
+                        
                       </div>
+                      <div class="col-md-4 detailed" style="margin-top:10px">
+                        <h4>SPL CREDITS</h4>
+                        <div class="col-lg-12">
+                            <table width="100%">
+                                <tr>
+                                    <td width="50%">SLP: </td>
+                                    <td><?=$spl;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Used: </td>
+                                    <td><?=$splused;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Remaining: </td>
+                                    <td><?=$splrem;?></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                      </div>
+
+
 
                       <!-- /col-md-6 -->
                     </div>

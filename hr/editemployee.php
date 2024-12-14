@@ -305,7 +305,7 @@ if(mysqli_num_rows($sqlChecklist)>0){
                 <div class="form-group">
                   <label class="col-sm-3 col-sm-3 control-label">Address</label>
                   <div class="col-sm-9">
-                    <textarea name="address" class="form-control" required rows="2"><?=$address;?></textarea>
+                    <textarea name="address" class="form-control" required rows="5"><?=$address;?></textarea>
                   </div>
                 </div>
                 <h4 style="margin-top:57px; margin-bottom:40px"><i class="fa fa-address-book"></i> EMERGENCY CONTACT DETAILS</h4>
@@ -337,6 +337,54 @@ if(mysqli_num_rows($sqlChecklist)>0){
               <h4><i class="fa fa-user"></i> EMPLOYEE DETAILS</h4>
             </div>
             <div class="panel-body">
+            <div class="form-group">
+                  <label class="col-sm-3 col-sm-3 control-label">Company</label>
+                  <div class="col-sm-5">
+                    <select name="company" class="form-control" required>
+                      <option value="<?=$companyid;?>"><?=$companyid;?></option>
+                      <?php
+                      $sqlCompany=mysqli_query($con,"SELECT companycode FROM settings WHERE status='Active' ORDER BY companycode ASC");
+                      if(mysqli_num_rows($sqlCompany)>0){
+                        while($comp=mysqli_fetch_array($sqlCompany)){
+                          echo "<option value='$comp[companycode]'>$comp[companycode]</option>";
+                        }
+                      }
+                      ?>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 col-sm-3 control-label">Department</label>
+                  <div class="col-sm-5">
+                    <select name="department" class="form-control" required>
+                      <option value="<?=$department;?>"><?=$department;?></option>
+                      <?php
+                      $sqlCompany=mysqli_query($con,"SELECT * FROM department ORDER BY department ASC");
+                      if(mysqli_num_rows($sqlCompany)>0){
+                        while($comp=mysqli_fetch_array($sqlCompany)){
+                          echo "<option value='$comp[id]'>$comp[department]</option>";
+                        }
+                      }
+                      ?>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-3 col-sm-3 control-label">Job Title</label>
+                  <div class="col-sm-8">
+                    <select name="jobtitle" class="form-control" required>
+                      <option value="<?=$jobtitle;?>"><?=$jobtitle;?></option>
+                      <?php
+                      $sqlCompany=mysqli_query($con,"SELECT * FROM jobtitle ORDER BY jobtitle ASC");
+                      if(mysqli_num_rows($sqlCompany)>0){
+                        while($comp=mysqli_fetch_array($sqlCompany)){
+                          echo "<option value='$comp[id]'>$comp[jobtitle]</option>";
+                        }
+                      }
+                      ?>
+                    </select>
+                  </div>
+                </div>
                 <div class="form-group">
                   <label class="col-sm-3 col-sm-3 control-label">Status</label>
                   <div class="col-sm-4">
@@ -573,10 +621,16 @@ if(mysqli_num_rows($sqlChecklist)>0){
       $eligible=$_GET['eligibility'];
       $referredby=$_GET['referredby'];
       $referreddate=$_GET['referreddate'];
+      $contactperson=$_GET['contactperson'];
+      $contactnumber=$_GET['contactnumber'];
+      $relationship=$_GET['relationship'];
       $table="employee_profile";
-      $values="SET idno='$idno',lastname='$lastname',firstname='$firstname',middlename='$middlename',suffix='$suffix',nickname='$nickname',birthdate='$birthdate',civilstatus='$civilstatus',sex='$gender',eligibility='$eligible',address='$address',updatedby='$updatedby',updateddatetime='$datenow' WHERE id='$id'";
+      $values="SET idno='$idno',lastname='$lastname',firstname='$firstname',middlename='$middlename',suffix='$suffix',nickname='$nickname',birthdate='$birthdate',civilstatus='$civilstatus',sex='$gender',eligibility='$eligible',address='$address',contactperson='$contactperson',contactnumber='$contactnumber',relationship='$relationship',updatedby='$updatedby',updateddatetime='$datenow' WHERE id='$id'";
       $sqlAddEmployee=mysqli_query($con,"UPDATE $table $values");
 
+      $company=$_GET['company'];  
+      $department=$_GET['department'];
+      $jobtitle=$_GET['jobtitle'];
       $status=$_GET['status'];
       $datehired=$_GET['datehired'];
       $dateregular=$_GET['dateregular'];
@@ -586,7 +640,7 @@ if(mysqli_num_rows($sqlChecklist)>0){
       $fulltime=date('Y-m-d',strtotime('1 years',strtotime($dateregular)));
 
       $table="employee_details";
-      $values="SET idno='$idno',status='$status',dateofhired='$datehired',dateofregular='$dateregular',dateoffulltime='$fulltime',dateleaveeffective='$dateleaveeffective',location='$location',work_area='$work_area',updatedby='$updatedby',updateddatetime='$datenow' WHERE idno='$oldidno'";
+      $values="SET idno='$idno',company='$company',department='$department',designation='$jobtitle',status='$status',dateofhired='$datehired',dateofregular='$dateregular',dateoffulltime='$fulltime',dateleaveeffective='$dateleaveeffective',location='$location',work_area='$work_area',updatedby='$updatedby',updateddatetime='$datenow' WHERE idno='$oldidno'";
       $sqlAddEmployee=mysqli_query($con,"UPDATE $table $values");
 
       $insurance=$_GET['insurance'];

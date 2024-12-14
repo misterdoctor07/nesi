@@ -118,15 +118,24 @@
           $sqlLeaveCredits=mysqli_query($con,"SELECT * FROM leave_credits WHERE idno='$idno'");
           if(mysqli_num_rows($sqlLeaveCredits)>0){
             $leave=mysqli_fetch_array($sqlLeaveCredits);
-            $vl=$leave['vacationleave'];
-            $vlused=$leave['vlused'];
-            $sl=$leave['sickleave'];
-            $slused=$leave['slused'];
-            $pto=$leave['pto'];
-            $ptoused=$leave['ptoused'];
+            $vl=$leave['vacationleave']??0;
+            $vlused=$leave['vlused']??0;
+            $sl=$leave['sickleave']??0;
+            $slused=$leave['slused']??0;
+            $pto=$leave['pto']??0;
+            $ptoused=$leave['ptoused']??0;
+            $bday=$leave['bdayleave']??0;
+            $bdayused=$leave['blp_used']??0;
+            $earlyout=$leave['earlyout']??0;
+            $eo_used=$leave['eo_used']??0;
+            $spl=$leave['spl']??0;
+            $splused=$leave['spl_used']??0;
             $vlrem=$vl-$vlused;
             $slrem=$sl-$slused;
             $ptorem=$pto-$ptoused;
+            $blprem=$bday-$bdayused;
+            $eorem=$earlyout-$eo_used;
+            $splrem=$spl-$splused;
           }else{
             $vl="";
             $vlused="";
@@ -134,10 +143,28 @@
             $slused="";
             $pto="";
             $ptoused="";
+            $bday="";
+            $bdayused="";
+            $earlyout="";
+            $eo_used="";
             $vlrem="";
             $slrem="";
             $ptorem="";
+            $blprem="";
+            $eorem="";
+            $spl="";
+            $splused="";
           }
+          $sqlPoints = mysqli_query($con, "SELECT SUM(points) as total_points FROM points WHERE idno='$idno'");
+if (mysqli_num_rows($sqlPoints) > 0) {
+    $point = mysqli_fetch_array($sqlPoints);
+    $points = $point['total_points'] ?? 0; // Default to 0 if no points
+} else {
+    $points = 0; // Default to 0 if no records found
+}
+
+// Format points to 1 decimal place
+$points = number_format((float)$points, 1, '.', '');
           ?>
         <div class="col-lg-12">
             <a href="?manageemployee"><h4><i class="fa fa-arrow-left"></i> Back</h4></a>
@@ -160,16 +187,64 @@
                 <h6><?=$designation;?></h6>
                 <p><?=$companyname;?></p>
                 <br>
-                <p>&nbsp;</p>
+                <p> <p style="color:red; font-size: 16px;">  <tr >
+    <td width="100%">Points:</td>
+    <td><?=$points;?></td>
+</tr></p></p>
               </div>
               <!-- /col-md-4 -->
               <?php
-              if(file_exists('../Employees/'.$idno.'.png')){
-                $image="../Employees/".$idno.".png";
-              }else{
-                $image="../Employees/".$idno.".jpg";
-              }
-              ?>
+            
+            // Check if the form is submitted
+            
+            if (isset($_POST['submit'])) {
+               $idno = $_POST['idno']; // User's ID
+               $target_dir = "../Employees/";
+           
+               // Handle file upload
+               if (!empty($_FILES['profile_pic']['name'])) {
+                   $file_ext = strtolower(pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION));
+                   $target_file = $target_dir . $idno . "." . $file_ext;
+           
+                   // Check if it's a valid image file (you can extend this)
+                   $valid_extensions = array("jpg", "png", "jpeg");
+                   if (in_array($file_ext, $valid_extensions)) {
+                       // Check if temporary file exists and is readable
+                       if (file_exists($_FILES['profile_pic']['tmp_name']) && is_readable($_FILES['profile_pic']['tmp_name'])) {
+                           // Delete existing profile picture
+                           $existing_files = glob($target_dir . $idno . ".*");
+                           foreach ($existing_files as $existing_file) {
+                               unlink($existing_file);
+                           }
+           
+                           // Upload the new file
+                           if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
+                               $image = $target_file;
+                           } else {
+                               $error = "Error uploading file.";
+                               error_log("Failed to move uploaded file: " . $_FILES['profile_pic']['tmp_name']);
+                           }
+                       } else {
+                           $error = "Temporary file not found or not readable.";
+                           error_log("Temporary file issue: " . $_FILES['profile_pic']['tmp_name']);
+                       }
+                   } else {
+                       $error = "Invalid file format. Only JPG, JPEG, and PNG allowed.";
+                   }
+               } else {
+                   $error = "No file selected.";
+               }
+           } else {
+               // Default image if no file is uploaded
+               if (file_exists("../Employees/".$idno.".png")) {
+                   $image = "../Employees/".$idno.".png";
+               } elseif (file_exists("../Employees/".$idno.".jpg")) {
+                   $image = "../Employees/".$idno.".jpg";
+               } else {
+                   $image = "path/to/default/image.jpg"; // Default image if no profile pic exists
+               }
+           }
+            ?>
               <div class="col-md-4 centered">
                 <div class="profile-pic">
                   <p><img src="<?=$image;?>" class="img-circle"></p>
@@ -430,8 +505,63 @@
                             </table>
                         </div>
                       </div>
+                      <div class="col-md-4 detailed" style="margin-top:10px">
+                        <h4>BLP Credits</h4>
+                        <div class="col-lg-12">
+                            <table width="100%">
+                                <tr>
+                                    <td width="50%">Credits:</td>
+                                    <td><?=$bday;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Used:</td>
+                                    <td><?=$bdayused;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Remaining:</td>
+                                    <td><?=$blprem;?></td>
+                                </tr>
+                            </table>
+                        </div>
                       </div>
-
+                      <div class="col-md-4 detailed" style="margin-top:10px">
+                        <h4>EO Credits</h4>
+                        <div class="col-lg-12">
+                            <table width="100%">
+                                <tr>
+                                    <td width="50%">Credits:</td>
+                                    <td><?=$earlyout;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Used:</td>
+                                    <td><?=$eo_used;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Remaining:</td>
+                                    <td><?=$eorem;?></td>
+                                </tr>
+                            </table>
+                        </div>
+                      </div>
+                      <div class="col-md-4 detailed" style="margin-top:10px">
+                        <h4>SPL CREDITS</h4>
+                        <div class="col-lg-12">
+                            <table width="100%">
+                                <tr>
+                                    <td width="50%">SLP: </td>
+                                    <td><?=$spl;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Used: </td>
+                                    <td><?=$splused;?></td>
+                                </tr>
+                                <tr>
+                                    <td width="30%">Remaining: </td>
+                                    <td><?=$splrem;?></td>
+                                </tr>
+                            </table>
+                        </div>
+                      </div>
 
 
                       <!-- /col-md-6 -->

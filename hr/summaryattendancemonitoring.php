@@ -117,7 +117,6 @@
                                             $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance 
                                             WHERE logindate BETWEEN '$startdate' AND '$enddate' 
                                             AND idno = '$idn' 
-                                            AND (loginam >= '22:00:00' OR logoutpm <= '06:00:00')
                                             ORDER BY logindate ASC");
                                             
                                             $login1 = "";
@@ -129,7 +128,6 @@
                                             $removepoint = "";
                                             
                                             if (mysqli_num_rows($sqlAttendance) > 0) {
-                                                // $datearray = ""; // Initialize $datearray if not done before
                                                 while ($attend = mysqli_fetch_array($sqlAttendance)) {
                                                     $idno = $company['idno'];
                                                     $datearray .= date('m/d/Y', strtotime($attend['logindate'])) . "<br>";

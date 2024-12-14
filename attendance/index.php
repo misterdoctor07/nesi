@@ -325,8 +325,8 @@ $unreadCount = count($announcements); // Count unread announcements
             switch ($leaveType) {
                 case 'VL': $leaveColumn = 'vlused'; break;
                 case 'SL': $leaveColumn = 'slused'; break;
-                case 'EO': $leaveColumn = 'eo_used'; break;
                 case 'PTO': $leaveColumn = 'ptoused'; break;
+                case 'EO': $leaveColumn = 'eo_used'; break;
                 case 'BLP': $leaveColumn = 'blp_used'; break;
                 case 'SPL': $leaveColumn = 'spl_used'; break;
             }
@@ -338,31 +338,37 @@ $unreadCount = count($announcements); // Count unread announcements
             // Set remarks to 'P' to indicate the employee is present
             $remarks = 'P';
             $status = (mysqli_fetch_array(mysqli_query($con, "SELECT startshift FROM employee_details WHERE idno='$empid'")))['startshift'] <= "04:00:00" || 
-                (mysqli_fetch_array(mysqli_query($con, "SELECT startshift FROM employee_details WHERE idno='$empid'")))['startshift'] == "23:00:00" ? "nd/work" : "work";
+                (mysqli_fetch_array(mysqli_query($con, "SELECT startshift FROM employee_details WHERE idno='$empid'")))['startshift'] == "23:00:00" ? "work" : "nd/work";
             mysqli_query($con, "UPDATE attendance SET status = '$status' WHERE  idno='$empid' AND logindate='$datenow'");
         }
 
         if ($logintype === 'loginam') {
             // Check if the employee has already logged in for AM
-            // Assume $attendanceRecord is retrieved from the database
-            // Example: $attendanceRecord = mysqli_fetch_array($sqlAttendance);
-            if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceRecord['loginam'] !== 'null') {
-              echo "<script>
-                  document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
-                  setTimeout(function() {
-                      window.location='../attendance/';
-                  }, 3000);
-              </script>";
-              exit;
-            }
+    // Assume $attendanceRecord is retrieved from the database
+// Example: $attendanceRecord = mysqli_fetch_array($sqlAttendance);
+if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceRecord['loginam'] !== 'null') {
+  echo "<script>
+      document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
+      setTimeout(function() {
+          window.location='../attendance/';
+      }, 3000);
+  </script>";
+  exit;
+}
 
-    // Determine if the employee has an 11 PM shift and if they are logging in between 12:00 AM and 1:00 AM
+
+
     $employeeStartShift = mysqli_fetch_array(mysqli_query($con, "SELECT startshift FROM employee_details WHERE idno='$empid'"))['startshift'];
-    if ($employeeStartShift == "23:00:00" && date('H:i:s') >= "00:00:00" && date('H:i:s') <= "02:00:00") {
-        // If the employee is logging in between 12:00 AM and 1:00 AM and has an 11 PM shift, adjust logindate to the previous day
-        $logindateAdjusted = date('Y-m-d', strtotime('-1 day', strtotime($datenow)));
+if ($employeeStartShift >= "22:00:00" || $employeeStartShift <= "02:00:00") {
+    $status = "nd/work";
     } else {
-        // Otherwise, use the current date
+    $status = "work";
+}
+
+// Adjust logindate based on status
+if ($status === "nd/work") {
+    $logindateAdjusted = date('Y-m-d', strtotime('-1 day', strtotime($datenow)));
+} else {
         $logindateAdjusted = $datenow;
     }
 
@@ -371,18 +377,48 @@ $unreadCount = count($announcements); // Count unread announcements
 
     // Insert new attendance record if it doesn't exist
     if (!$attendanceRecord) {
-      // Set unused fields to "-" by default and insert a new record
-        $status = ($employeeStartShift <= "04:00:00" || $employeeStartShift == "23:00:00") ? "nd/work" : "work";
-        $sqlInsert = mysqli_query($con, "INSERT INTO attendance (idno, loginam, logindate, status, remarks) VALUES ('$empid', '$timenow', '$logindateAdjusted', '$status', '$remarks')");
-    } else {
-        // Update the existing record with loginam
-        $sqlUpdate = mysqli_query($con, "UPDATE attendance SET loginam='$timenow', remarks='$remarks' WHERE idno='$empid' AND logindate='$logindateAdjusted'");
-    }
+      // Determine status before preparing the query
+      if ($employeeStartShift >= "03:00:00" && $employeeStartShift <= "15:00:00") {
+          $status = "work";
+      } elseif ($employeeStartShift >= "22:00:00" || $employeeStartShift <= "00:00:00") {
+          $status = "nd/work";
+      } else {
+          $status = "other";
+      }
+      
+      // Prepare the INSERT query
+      $stmt = $con->prepare(
+          "INSERT INTO attendance (idno, loginam, logoutam, loginpm, logoutpm, logindate, status, remarks) 
+          VALUES (?, ?, '0', '0', '0', ?, ?, 'P')"
+      );
+  
+      // Bind parameters
+      $stmt->bind_param("ssss", $empid, $timenow, $logindateAdjusted, $status);
+  } else {
+      // Update the existing record with loginam
+      $stmt = $con->prepare(
+          "UPDATE attendance SET loginam = ?, remarks = 'P' WHERE idno = ? AND logindate = ?"
+      );
+  
+      // Bind parameters
+      $stmt->bind_param("sss", $timenow, $empid, $logindateAdjusted);
+  }
+  
+  // Execute the prepared statement
+  if ($stmt->execute()) {
     echo "<script>
         window.location='../attendance/?success&empname=$name&type=Welcome';
     </script>";
+  } else {
+      echo "<script>
+          alert('Error: " . $stmt->error . "');
+          window.location='../attendance/';
+      </script>";
+  }
+  
 }elseif ($logintype === 'logoutam') {
             // Check if the employee has already logged out for AM
+           
             if ($attendanceRecord && !empty($attendanceRecord['logoutam']) && $attendanceRecord['logoutam'] !== 'null') {
               echo "<script>
                   document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
@@ -392,7 +428,7 @@ $unreadCount = count($announcements); // Count unread announcements
               </script>";
               exit;
             }
-
+          
             // Retrieve the most recent attendance record for this employee
             $sqlCheckLatestSession = mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' ORDER BY logindate DESC LIMIT 1");
             $latestAttendanceRecord = mysqli_fetch_array($sqlCheckLatestSession);
@@ -424,7 +460,7 @@ $unreadCount = count($announcements); // Count unread announcements
               </script>";
               exit;
             }
-
+          
             // Retrieve the most recent attendance record for this employee
             $sqlCheckLatestSession = mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' ORDER BY logindate DESC LIMIT 1");
             $latestAttendanceRecord = mysqli_fetch_array($sqlCheckLatestSession);
@@ -447,6 +483,7 @@ $unreadCount = count($announcements); // Count unread announcements
 
         } elseif ($logintype === 'logoutpm') {
             // Check if the employee has already logged out for PM
+           
             if ($attendanceRecord && !empty($attendanceRecord['logoutpm']) && $attendanceRecord['logoutpm'] !== '0') {
               echo "<script>
                   document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
@@ -455,8 +492,8 @@ $unreadCount = count($announcements); // Count unread announcements
                   }, 3000);
               </script>";
               exit;
-            }
-
+          }
+          
             // Retrieve the most recent attendance record for this employee
             $sqlCheckLatestSession = mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' ORDER BY logindate DESC LIMIT 1");
             $latestAttendanceRecord = mysqli_fetch_array($sqlCheckLatestSession);
@@ -631,4 +668,3 @@ function checkTime(i) {
 </body>
 
 </html>
-

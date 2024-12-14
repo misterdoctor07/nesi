@@ -1,12 +1,13 @@
 <?php
     include '../config.php';
 
-    $idno=$_GET['idno'];
-    $id=$_GET['id'];
-    $comp=$_GET['company'];
-    $startdate=$_GET['startdate'];
-    $enddate=$_GET['enddate'];
-
+   
+    $idno = $_GET['idno'];
+    $id = $_GET['id'];
+    $comp = $_GET['company'];
+    $startdate = $_GET['startdate'];
+    $enddate = $_GET['enddate'];
+    
     $sqlCredits = mysqli_query($con, "SELECT * FROM leave_credits WHERE idno='$idno'");
     $credits = []; 
     if (mysqli_num_rows($sqlCredits) > 0) {
@@ -16,25 +17,26 @@
         $credits['PTO'] = $credit['pto'] - $credit['ptoused'];
         $credits['BLP'] = $credit['bdayleave'] - $credit['blp_used'];
         $credits['EO'] = $credit['earlyout'] - $credit['eo_used'];
+        $credits['SPL'] = $credit['spl'] - $credit['spl_used'];
     }
-    $sqlAttendance=mysqli_query($con,"SELECT * FROM attendance WHERE id='$id'");
-    if(mysqli_num_rows($sqlAttendance)>0){
-        $attend=mysqli_fetch_array($sqlAttendance);
-        $loginam=date('H:i',strtotime($attend['loginam']));
-        $logoutam=date('H:i',strtotime($attend['logoutam']));
-        $loginpm=date('H:i',strtotime($attend['loginpm']));
-        $logoutpm=date('H:i',strtotime($attend['logoutpm']));
-        $logindate=$attend['logindate'];
-        $status=$attend['status'];
-        $remarks=$attend['remarks'];
-    }else{
-        $loginam="";
-        $logoutam="";
-        $loginpm="";
-        $logoutpm="";
-        $logindate=$_GET['logindate'];
-        $status="";
-        $remarks="";
+    $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance WHERE id='$id'");
+    if (mysqli_num_rows($sqlAttendance) > 0) {
+        $attend = mysqli_fetch_array($sqlAttendance);
+        $loginam = $attend['loginam'] ? date('H:i', strtotime($attend['loginam'])) : '';
+        $logoutam = $attend['logoutam'] ? date('H:i', strtotime($attend['logoutam'])) : '';
+        $loginpm = $attend['loginpm'] ? date('H:i', strtotime($attend['loginpm'])) : '';
+        $logoutpm = $attend['logoutpm'] ? date('H:i', strtotime($attend['logoutpm'])) : '';
+        $logindate = $attend['logindate'];
+        $status = $attend['status'];
+        $remarks = $attend['remarks'];
+    } else {
+        $loginam = "";
+        $logoutam = "";
+        $loginpm = "";
+        $logoutpm = "";
+        $logindate = $_GET['logindate'];
+        $status = "";
+        $remarks = "";
     }
             $work="";
             $rh="";
@@ -82,13 +84,14 @@
       function SubmitDetails(){
           return confirm('Do you wish to submit details?');
       }
+    
     </script>
     <div class="row">
       <div class="col-lg-12">
       <h4 style="text-indent: 10px;">
-        <a href="javascript:history.back();"><i class="fa fa-arrow-left"></i> BACK</a> | 
-        <i class="fa fa-money"></i> MANAGE TIME
-      </h4>
+    <a href="javascript:history.back();"><i class="fa fa-arrow-left"></i> BACK</a> | 
+    <i class="fa fa-money"></i> MANAGE TIME
+</h4>
     </div>
     </div>
     <form class="form-horizontal style-form" method="GET" onSubmit="return SubmitDetails();">
@@ -102,7 +105,7 @@
     <div class="col-lg-4 mt">
             <div class="content-panel">
               <div class="panel-heading">
-                <input type="submit" name="submit" class="btn btn-primary" value="Save Details" style="float:right;">
+                <input type="submit" name="submit" class="btn btn-primary" value="Save Details" style="float:right;"> 
               <h4><i class="fa fa-clock-o"></i> ATTENDANCE DETAILS</h4>
             </div>
             <div class="panel-body">
@@ -113,35 +116,37 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="col-sm-4 col-sm-4 control-label">Login</label>
-                  <div class="col-sm-5">
-                    <input type="time" class="form-control" name="loginam" value="<?=$loginam;?>">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-4 col-sm-4 control-label">Logout</label>
-                  <div class="col-sm-5">
-                    <input type="time" class="form-control" name="logoutam" value="<?=$logoutam;?>">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-4 col-sm-4 control-label">Shift 2</label>
-                  <div class="col-sm-5">
+    <label class="col-sm-4 col-sm-4 control-label">Login</label>
+    <div class="col-sm-5">
+                    <input type="text" class="form-control" name="loginam"  value="<?=$loginam;?>">
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-4 col-sm-4 control-label">Logout</label>
+    <div class="col-sm-5">
+                    <input type="text" class="form-control" name="logoutam"  value="<?=$logoutam;?>">
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-4 col-sm-4 control-label">Shift 2</label>
+    <div class="col-sm-5">
 
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-4 col-sm-4 control-label">Login</label>
-                  <div class="col-sm-5">
-                    <input type="time" class="form-control" name="loginpm" value="<?=$loginpm;?>">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-sm-4 col-sm-4 control-label">Logout</label>
-                  <div class="col-sm-5">
-                    <input type="time" class="form-control" name="logoutpm" value="<?=$logoutpm;?>">
-                  </div>
-                </div>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-4 col-sm-4 control-label">Login</label>
+    <div class="col-sm-5">
+                    <input type="text" class="form-control" name="loginpm"  value="<?=$loginpm;?>">
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-4 col-sm-4 control-label">Logout</label>
+    <div class="col-sm-5">
+                    <input type="text" class="form-control" name="logoutpm"  value="<?=$logoutpm;?>">
+    </div>
+</div>
+
+
                 <div class="form-group">
                   <label class="col-sm-4 col-sm-4 control-label">Log Date</label>
                   <div class="col-sm-5">
@@ -164,7 +169,7 @@
                   <label class="col-sm-4 col-sm-4 control-label">Leave Type</label>
                   <div class="col-sm-6">
                     <select name="leavetype" class="form-control" required>
-                      <option value="<?=$remarks;?>"><?=$remarks;?></option>
+                    <option value="<?=$remarks;?>"><?=$remarks;?></option>
                       <option value="P">P</option>
                       <option value="P-EO"> P-EO</option>
                       <option value="VL"> Vacation Leave (VL)</option>
@@ -183,6 +188,10 @@
                       <option value="AWOL" required> AWOL</option>
                       <option value="CI-A" required> Absent - No Med Cert </option>
                       <option value="CI" required> Absent - with Med Cert</option>
+
+
+
+
                     </select>
                   </div>
                 </div>
@@ -191,7 +200,7 @@
           <!-- col-lg-12-->
         </div>
         </form>
-  <?php
+        <?php
 if (isset($_GET['submit'])) {
   $addedby = $_GET['addedby'];
   $datenow = date('Y-m-d H:i:s');
@@ -201,7 +210,10 @@ if (isset($_GET['submit'])) {
   $newLeaveType = $_GET['leavetype'];
 
   // Set time fields to NULL if the leave type is selected
-  if (!empty($newLeaveType)) {
+  // Set time fields to NULL only if a leave type is selected and the values are not provided
+// Clear time fields only when leave type is selected
+// Set time fields to '0' only if a leave type is selected
+if (!empty($newLeaveType)) {
     // Check if the values exist and are not empty; otherwise, set them to '0'
     $loginam = !empty($_GET['loginam']) ? $_GET['loginam'] : '0';
     $logoutam = !empty($_GET['logoutam']) ? $_GET['logoutam'] : '0';
@@ -214,6 +226,9 @@ if (isset($_GET['submit'])) {
     $loginpm = isset($_GET['loginpm']) ? $_GET['loginpm'] : '0';
     $logoutpm = isset($_GET['logoutpm']) ? $_GET['logoutpm'] : '0';
 }
+
+
+
 
   // Ensure that status is properly formatted
   if (!empty($newStatus)) {
@@ -307,4 +322,5 @@ function areEquivalentLeaveTypes($leaveType1, $leaveType2) {
 }
 
 ?>
+
 

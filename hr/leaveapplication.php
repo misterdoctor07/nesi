@@ -125,6 +125,85 @@
     font-size: 12px;
 }
 </style>
+<script>
+    function tablesToExcel() {
+        const dataType = 'application/vnd.ms-excel';
+        let tableHTML = '';
+
+        // Define filenames based on the outer tab index
+        const filenames = ['NESI1_Leave_Application_Report.xls', 'NESI2_Leave_Application_Report.xls', 'NEWIND_Leave_Application_Report.xls'];
+
+        // Get all outer tabs
+        const outerTabs = document.querySelectorAll('.nav-tabs li a');
+        let activeTabIndex = -1;
+
+        // Find the index of the active outer tab
+        outerTabs.forEach((tab, index) => {
+            if (tab.parentElement.classList.contains('active')) {
+                activeTabIndex = index; // Set the index of the active tab
+            }
+        });
+
+        // Set the filename based on the active tab index
+        const filename = (activeTabIndex >= 0 && activeTabIndex < filenames.length) ? filenames[activeTabIndex] : 'Leave_Application_Report.xls';
+
+        // Get the currently active outer tab
+        const activeOuterTab = outerTabs[activeTabIndex];
+        if (activeOuterTab) {
+            const outerTabHref = activeOuterTab.getAttribute('href'); // Get the href of the active outer tab
+            const activeOuterTabPane = document.querySelector(outerTabHref); // Get the corresponding tab pane
+
+            // Gather all inner tabs and their corresponding tables from the active outer tab pane
+            const innerTabs = activeOuterTabPane.querySelectorAll('.nav-pills li a');
+            innerTabs.forEach(innerTab => {
+                // Get the inner tab name and remove any trailing numbers
+                let innerTabName = innerTab.textContent.trim();
+                innerTabName = innerTabName.replace(/\s+\d+$/, ''); // Remove trailing space and number
+
+                const innerTabContent = document.querySelector(innerTab.getAttribute('href')); // Get the corresponding inner tab content
+
+                // Check if the inner tab content has a table
+                const table = innerTabContent.querySelector('table');
+                if (table) {
+                    // Add inner tab name as a header before the table
+                    tableHTML += `<h3>${innerTabName}</h3>`; // Add header for the table
+
+                    // Clone the table to modify it
+                    const clonedTable = table.cloneNode(true);
+                    
+                    // Add inline styles for borders
+                    clonedTable.style.borderCollapse = 'collapse'; // Collapse borders
+                    clonedTable.querySelectorAll('th, td').forEach(cell => {
+                        cell.style.border = '1px solid black'; // Add border to each cell
+                        cell.style.padding = '5px'; // Optional: Add padding for better spacing
+                    });
+
+                    tableHTML += clonedTable.outerHTML + '<br>'; // Append each table's HTML
+                }
+            });
+
+            // Create a download link
+            const downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+
+            // Create a Blob with the combined table HTML
+            const blob = new Blob([tableHTML], {
+                type: dataType
+            });
+
+            // Create a URL for the Blob
+            const url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = filename; // Set the correct filename
+
+            // Trigger the download
+            downloadLink.click();
+
+            // Clean up
+            document.body.removeChild(downloadLink);
+        }
+    }
+</script>
 <?php
     // Fetch unique companies from the employee_details table
     $sqlCompanies = mysqli_query($con, "SELECT DISTINCT company FROM employee_details ORDER BY company");
@@ -140,6 +219,11 @@
             <h4>
                 <a href="?main"><i class="fa fa-arrow-left"></i> HOME</a> | 
                 <i class="fa fa-suitcase"></i> LEAVE APPLICATION
+                <div style="float:right; margin-bottom: 20px;">
+                    <form>
+                        <button type="button" onclick="tablesToExcel('Leave_Application_Report')" class="btn btn-success">EXPORT TO EXCEL</button>
+                    </form>
+                </div>
             </h4>
         </div>
         
@@ -246,7 +330,7 @@
                     </div>
                 </div>
 
-                    <table class="table table-bordered table-striped table-condensed">
+                    <table class="table table-bordered table-striped table-condensed" id="attendanceTable">
                         <thead>
                             <tr>
                                 <th width="2%" style="text-align: center;">No.</th>
@@ -369,30 +453,38 @@ if (isset($_GET['post'])) {
         $dateArray = [];
         $daysAdded = 0;
 
-        // Define if not night shift
-        $isNotNightShift = ($startshift && ($startshift != '23:00:00' || $startshift != '00:00:00'));
+        // // Define if not night shift
+        // $isNotNightShift = ($startshift && ($startshift != '23:00:00' || $startshift != '00:00:00'));
+        $isNightShift = ($startshift && ($startshift == '23:00:00' || $startshift == '00:00:00'));
+        $isNotNightShift = ($startshift && ($startshift != '23:00:00' && $startshift != '00:00:00'));
         
         foreach ($dateRange as $date) {
             if ($daysAdded >= $numberOfDays) {
                 break;
             }
-
-            $dayOfWeek = $date->format('N');
-
+        
+            $dayOfWeek = $date->format('N'); // Get the numeric day of the week (1 = Monday, 7 = Sunday)
+        
             // Skip Sundays for all shifts
             if ($dayOfWeek == 7) {
                 continue;
             }
-
-            // Skip Mondays if it’s a night shift
-            if ($dayOfWeek == 1 && $isNotNightShift) {
+        
+            // Skip Mondays only if it's a day shift
+            if ($isNotNightShift && $dayOfWeek == 1) {
                 continue;
             }
-
+        
+            // Skip Saturdays only if it's a night shift
+            if ($isNightShift && $dayOfWeek == 6) {
+                continue;
+            }
+        
             // Add valid date to array
             $dateArray[] = $date->format('Y-m-d');
             $daysAdded++;
         }
+        
 
 
         // Update leave application status
@@ -408,7 +500,7 @@ if (isset($_GET['post'])) {
                     // Insert new attendance row if date doesn't exist
                     $sqlInsertAttendance = mysqli_query($con, 
                         "INSERT INTO attendance (idno, logindate, loginam, logoutam, loginpm, logoutpm, remarks) 
-                        VALUES ('$idno', '$leaveDate', '00:00:00', '00:00:00', '00:00:00', '00:00:00', '$leaveType')");
+                        VALUES ('$idno', '$leaveDate', '0', '0', '0', '0', '$leaveType')");
                     
                     if (!$sqlInsertAttendance) {
                         echo "<script>alert('Error inserting new attendance record for date: $leaveDate');</script>";

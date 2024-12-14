@@ -62,13 +62,13 @@
                 <div class="form-group">
                   <label class="col-sm-3 col-sm-3 control-label">Date From</label>
                   <div class="col-sm-7">
-                    <input type="date" name="startdate" class="form-control">
+                    <input type="date" name="startdate" required class="form-control">
                   </div>
                 </div>
                 <div class="form-group">
                   <label class="col-sm-3 col-sm-3 control-label">Date To</label>
                   <div class="col-sm-7">
-                    <input type="date" name="enddate" class="form-control">
+                    <input type="date" name="enddate" required class="form-control">
                   </div>
                 </div>
             </div>
@@ -76,7 +76,24 @@
           <!-- col-lg-12-->
         </div>
         </form>
+        <!-- <script>
+    function SubmitDetails() {
+        // Get all department checkboxes
+        const departmentCheckboxes = document.querySelectorAll('input[name="departments[]"]');
         
+        // Check if at least one department is selected
+        const isDepartmentSelected = Array.from(departmentCheckboxes).some(checkbox => checkbox.checked);
+
+        if (!isDepartmentSelected) {
+            alert("Please select at least one department.");
+            return false; // Prevent form submission
+        }
+
+        // Additional validation can be added here
+
+        return true; // Allow form submission
+    }
+</script> -->
 
         <form class="form-horizontal style-form" method="GET" action="attendancemonitoringsummary.php" onSubmit="return SubmitDetails();" target="_blank">
       <!-- <input type="hidden" name="attendancemonitoringsummary"> -->

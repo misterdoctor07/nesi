@@ -322,8 +322,8 @@ function updateEndDate() {
         if(startshift == "23:00:00" || startshift == "00:00:00") {
             while (daysAdded < totalDaysToAdd) {
                 endDateValue.setDate(endDateValue.getDate() + 1); 
-                // Check if it's a weekday (Monday to Saturday)
-                if (endDateValue.getDay() !== 0) { // 0 = Sunday
+                // Check if it's a weekday (Monday to Friday)
+                if (endDateValue.getDay() !== 6 && endDateValue.getDay() !== 0) { // 0 = Sunday
                     daysAdded++; 
                 }
             }

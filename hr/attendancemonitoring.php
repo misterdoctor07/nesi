@@ -157,24 +157,33 @@ if(isset($_GET['edit'])){
     }
   }
   
-  //Delete Infraction
-  if(isset($_GET['deleteinfraction'])){
-    $idno=$_GET['idno'];
-    $id=$_GET['id'];
-    $company=$_GET['company'];
-    $startdate=$_GET['startdate'];
-    $enddate=$_GET['enddate'];
-    $logindate=$_GET['logindate'];
-    $sqlDelete=mysqli_query($con,"DELETE FROM points WHERE id='$id'");
-    if($sqlDelete){
-      $sqlUpdate=mysqli_query($con,"UPDATE attendance SET remarks='P' WHERE logindate='$logindate' AND idno='$idno'");
-    echo "<script>";
-      echo "alert('Infraction successfully removed!');window.history.back();</script>";
-    echo "</script>";
-  }else{
-    echo "<script>";
-      echo "alert('Unable to remove infraction!');window.history.back();</script>";
-    echo "</script>";
-    }
+  // Delete the infraction
+  $sqlDelete = mysqli_query($con, "DELETE FROM points WHERE id='$id'");
+  if (!$sqlDelete) {
+      die("Error deleting infraction: " . mysqli_error($con));
   }
+
+  if ($sqlDelete) {
+      // Mark attendance as manually reviewed and update remarks
+      $sqlUpdate = mysqli_query($con, 
+          "UPDATE attendance 
+           SET remarks='P'
+           WHERE logindate='$logindate' AND idno='$idno'"
+      );
+
+      if (!$sqlUpdate) {
+          die("Error updating attendance: " . mysqli_error($con));
+      }
+
+      if ($sqlUpdate) {
+          echo "<script>";
+          echo "alert('Infraction successfully removed!');window.history.back();</script>";
+          echo "</script>";
+      }
+  } else {
+      echo "<script>";
+      echo "alert('Unable to remove infraction!');window.history.back();</script>";
+      echo "</script>";
+  }
+
 ?>

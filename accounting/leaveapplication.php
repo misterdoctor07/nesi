@@ -26,7 +26,8 @@
                       <th width="3%">No.</th>
                       <th>Employee</th>
                       <th>Leave Type</th>
-                      <th>Inclusive Dates</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
                       <th>Reasons</th>                      
                       <th>Date Applied</th>
                       <th>Approved By</th>
@@ -39,9 +40,9 @@
                     if(isset($_GET['submit'])){
                       $startdate=$_GET['startdate'];
                       $enddate=$_GET['enddate'];
-                      $sqlEmployee=mysqli_query($con,"SELECT la.*,la.id as leaveno,la.status as leavestatus,ep.*,ed.* FROM leave_application la INNER JOIN employee_profile ep ON ep.idno=la.idno INNER JOIN employee_details ed ON ed.idno=ep.idno WHERE la.datearray BETWEEN '$startdate' AND '$enddate' ORDER BY la.datearray DESC");
+                      $sqlEmployee=mysqli_query($con,"SELECT la.*,la.id as leaveno,la.appstatus as leavestatus,ep.*,ed.* FROM leave_application la INNER JOIN employee_profile ep ON ep.idno=la.idno INNER JOIN employee_details ed ON ed.idno=ep.idno WHERE la.datearray BETWEEN '$startdate' AND '$enddate' ORDER BY la.datearray DESC");
                     }else{
-                      $sqlEmployee=mysqli_query($con,"SELECT la.*,la.id as leaveno,la.status as leavestatus,ep.*,ed.* FROM leave_application la INNER JOIN employee_profile ep ON ep.idno=la.idno INNER JOIN employee_details ed ON ed.idno=ep.idno WHERE YEAR(la.datearray) = '".date('Y')."' ORDER BY la.datearray DESC");
+                      $sqlEmployee=mysqli_query($con,"SELECT la.*,la.id as leaveno,la.appstatus as leavestatus,ep.*,ed.* FROM leave_application la INNER JOIN employee_profile ep ON ep.idno=la.idno INNER JOIN employee_details ed ON ed.idno=ep.idno WHERE YEAR(la.datearray) = '".date('Y')."' ORDER BY la.datearray DESC");
                     }                                              
                       if(mysqli_num_rows($sqlEmployee)>0){
                         while($company=mysqli_fetch_array($sqlEmployee)){                                                                                
@@ -85,7 +86,8 @@
                             echo "<td>$x.</td>";
                             echo "<td>$company[lastname], $company[firstname]</td>";
                             echo "<td>$leave</td>";                            
-                            echo "<td>$company[inclusivedates]</td>";                            
+                            echo "<td>$company[dayfrom]</td>"; 
+                            echo "<td>$company[dayto]</td>";                            
                             echo "<td align='left'>$company[reason]</td>";
                             echo "<td align='left'>".date('m/d/Y',strtotime($company['datearray']))."</td>";
                             echo "<td align='left'>";
