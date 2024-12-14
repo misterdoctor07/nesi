@@ -98,7 +98,7 @@
               </a>
             <ul class="sub">
               <li><a href="?createpayroll">Create Payroll</a></li>
-              <li><a href="?viewpayroll">Manage Payroll</a></li>
+              <li><a href="?managepayroll">Manage Payroll</a></li>
               <li><a href="?payrollsummary">Payroll Summary</a></li>
             </ul>
           </li>
