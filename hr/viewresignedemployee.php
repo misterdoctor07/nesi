@@ -16,7 +16,7 @@
                       <th>Date of Birth</th>
                       <th>Job Title</th>
                       <th>Department</th>
-                      <th>Date Hired</th>
+                      <th>Date Hired</th> 
                       <th>Date Resigned</th>
                       <th>Remarks</th>
                       <th></th>

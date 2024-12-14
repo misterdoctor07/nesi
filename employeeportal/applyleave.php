@@ -1,10 +1,6 @@
-<script type="text/javascript">
-      function SubmitDetails(){
-          return confirm('Do you wish to submit details?');
-      }
-</script>
 <?php 
 $userId = $_SESSION['idno'];
+
 $sqlCredits = mysqli_query($con, "SELECT * FROM leave_credits WHERE idno='$userId'");
 $credits = []; 
 if (mysqli_num_rows($sqlCredits) > 0) {
@@ -15,19 +11,13 @@ if (mysqli_num_rows($sqlCredits) > 0) {
     $credits['BLP'] = $credit['bdayleave'] - $credit['blp_used'];
     $credits['EO'] = $credit['earlyout'] - $credit['eo_used'];
 }
-// Fetch user birthdate
+// Fetch user birthdate from employee profile or relevant table
 $sqlBirthDate = mysqli_query($con, "SELECT birthdate FROM employee_profile WHERE idno='$userId'");
 if (mysqli_num_rows($sqlBirthDate) > 0) {
     $birthDate = mysqli_fetch_assoc($sqlBirthDate)['birthdate'];
     $birthMonth = date('m', strtotime($birthDate)); // Extract month of birth
 } else {
     $birthMonth = null; // Handle case if birthdate is not found
-}
-
-//Fetch user start shift
-$sqlStartShift = mysqli_query($con, "SELECT startshift FROM employee_details WHERE idno='$userId'");
-if(mysqli_num_rows($sqlStartShift)>0){
-    $startshift=mysqli_fetch_assoc($sqlStartShift)['startshift'];
 }
 ?>
 
@@ -40,7 +30,7 @@ if(mysqli_num_rows($sqlStartShift)>0){
     </div>
 </div>
 
-<form class="form-horizontal" method="GET" onsubmit="return SubmitDetails();">
+<form class="form-horizontal" method="GET" onsubmit="return checkCredits();">
     <input type="hidden" name="applyleave">            
     <input type="hidden" name="addedby" value="<?=$fullname;?>">          
 
@@ -117,8 +107,7 @@ if (isset($_GET['submit'])) {
                                      WHERE idno='$idno' 
                                      AND leavetype='$leavetype' 
                                      AND dayfrom='$startDate' 
-                                     AND dayto='$endDate'
-                                     AND appstatus NOT IN ('Cancelled', 'Disapproved')");
+                                     AND dayto='$endDate'");
 
     if (mysqli_num_rows($sqlCheck) > 0) {
         echo "<script>alert('Leave application already exists for the selected dates and leave type!');</script>";
@@ -131,10 +120,47 @@ if (isset($_GET['submit'])) {
 
         // Check if the leave application was successfully inserted
         if ($sqlInsertLeave) {
-                echo "<script>alert('Leave application submitted successfully!');</script>";
-        }else {
-                echo "<script>alert('Failed to insert leave application. Please try again.');</script>";
-         }
+            // Update the used credits for the selected leave type in the leave_credits table
+            switch ($leavetype) {
+                case 'VL':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits 
+                                                            SET vlused = vlused + '$nofdays' 
+                                                            WHERE idno = '$idno'");
+                    break;
+                case 'SL':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits 
+                                                            SET slused = slused + '$nofdays' 
+                                                            WHERE idno = '$idno'");
+                    break;
+                case 'PTO':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits 
+                                                            SET ptoused = ptoused + '$nofdays' 
+                                                            WHERE idno = '$idno'");
+                    break;
+                case 'BLP':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits 
+                                                            SET blp_used = blp_used + '$nofdays' 
+                                                            WHERE idno = '$idno'");
+                    break;
+                case 'EO':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits 
+                                                            SET eo_used = eo_used + '$nofdays' 
+                                                            WHERE idno = '$idno'");
+                    break;                                        
+                default:
+                    echo "<script>alert('Leave type not recognized. No credits updated.');</script>";
+                    break;
+            }
+
+            // Check if credits were successfully updated
+            if ($sqlUpdateCredits) {
+                echo "<script>alert('Leave application submitted successfully and credits updated!');</script>";
+            } else {
+                echo "<script>alert('Failed to update leave credits. Please try again.');</script>";
+            }
+        } else {
+            echo "<script>alert('Failed to submit leave application. Please try again.');</script>";
+        }
     }
 }
 ?>
@@ -144,11 +170,10 @@ if (isset($_GET['submit'])) {
 function updateCredits(leaveType) {
     const credits = {
         VL: <?= isset($credits['VL']) ? $credits['VL'] : 0; ?>,
-        LTL: <?= isset($credits['LTL']) ? $credits['LTL'] : 0; ?>,
+        SL: <?= isset($credits['SL']) ? $credits['SL'] : 0; ?>,
         PTO: <?= isset($credits['PTO']) ? $credits['PTO'] : 0; ?>,
         BLP: <?= isset($credits['BLP']) ? $credits['BLP'] : 0; ?>,
-        EO: <?= isset($credits['EO']) ? $credits['EO'] : 0; ?>,
-        SPL: <?=isset($credits['SPL']) ? $credits['SPL'] :0; ?>
+        EO: <?= isset($credits['EO']) ? $credits['EO'] : 0; ?>
     };
 
     let creditInfo = document.getElementById('credit-info');
@@ -158,7 +183,7 @@ function updateCredits(leaveType) {
     let reasonField = document.getElementsByName('reasons')[0];
 
     // Define leave types that should not be disabled even with 0 credits
-    const excludedLeaveTypes = ['MTL', 'PTL', 'BL', 'MDL', 'EEO'];
+    const excludedLeaveTypes = ['SPL', 'MTL', 'PTL', 'BL', 'MDL', 'LTL', 'EEO'];
 
     // Check if the selected leave type is in the excluded list
     if (excludedLeaveTypes.includes(leaveType)) {
@@ -220,7 +245,6 @@ function checkCredits() {
     let selectedLeaveType = document.querySelector('select[name="leavetype"]').value;
     let userBirthdayMonth = "<?= $birthMonth; ?>"; // Extracted from PHP
     let selectedStartDate = new Date(startDate.value);
-    let startshift = "<?=$startshift;?>";
     
     // Check if the selected leave type requires a 3-day protocol
     if (withdayprotocol.includes(selectedLeaveType)) {
@@ -231,29 +255,28 @@ function checkCredits() {
             return false;
         }
 
-        // Set current date and add 3 days to it
         let currentDate = new Date();
         let minStartDate = new Date(currentDate);
         let lastPossibleDate = new Date(selectedStartDate);
         let daysAdded = 0;
-         
-            while (daysAdded < 3) {
-                minStartDate.setDate(minStartDate.getDate() + 1);
+        
+        while (daysAdded < 3) {
+            minStartDate.setDate(minStartDate.getDate() + 1);
                 if (minStartDate.getDay() !== 0 && minStartDate.getDay() !== 1) {
                     daysAdded++;
                 }
-            }
-        // Validate that the start date is at least 3 working days from today
-        if (new Date(startDate.value) < minStartDate) {
-            dateWarning.style.display = 'inline';
-            startDate.style.borderColor = 'red';
-            return false;
-        } else {
-            // Hide the error message if the start date is valid
-            dateWarning.style.display = 'none';
-            startDate.style.borderColor = '';
         }
-    }
+            // Validate that the start date is at least 3 working days from today
+            if (new Date(startDate.value) < minStartDate) {
+                dateWarning.style.display = 'inline';
+                startDate.style.borderColor = 'red';
+                return false;
+            } else {
+                // Hide the error message if the start date is valid
+                dateWarning.style.display = 'none';
+                startDate.style.borderColor = '';
+            }
+        }
 
     // For all leave types: check if the number of days is 1
     if (nofdays.value == 1) {
@@ -298,7 +321,6 @@ function updateEndDate() {
     let endDate = document.getElementsByName('endDate')[0];
     let nofdays = document.getElementById('nofdays');
     let endDateWarning = document.getElementById('end-date-warning');
-    let startshift = "<?=$startshift;?>";
 
     // Check if startDate has a value
     if (!startDate.value) {
@@ -319,21 +341,12 @@ function updateEndDate() {
     if (totalDaysToAdd > 0) {
         daysAdded = 1; 
 
-        if(startshift == "23:00:00" || startshift == "00:00:00") {
-            while (daysAdded < totalDaysToAdd) {
-                endDateValue.setDate(endDateValue.getDate() + 1); 
-                // Check if it's a weekday (Monday to Friday)
-                if (endDateValue.getDay() !== 6 && endDateValue.getDay() !== 0) { // 0 = Sunday
-                    daysAdded++; 
-                }
-            }
-        }else{  
-            while (daysAdded < totalDaysToAdd) {
-                endDateValue.setDate(endDateValue.getDate() + 1); 
-                // Check if it's a weekday (Tuesday to Saturday)
-                if (endDateValue.getDay() !== 0 && endDateValue.getDay() !== 1) { // 0 = Sunday, 1 = Monday
-                    daysAdded++; 
-                }
+        // Loop to calculate the end date while skipping Sundays and Mondays
+        while (daysAdded < totalDaysToAdd) {
+            endDateValue.setDate(endDateValue.getDate() + 1); 
+            // Check if it's a weekday (Tuesday to Saturday)
+            if (endDateValue.getDay() !== 0 && endDateValue.getDay() !== 1) { // 0 = Sunday, 1 = Monday
+                daysAdded++; 
             }
         }
     }

@@ -33,7 +33,7 @@ if(mysqli_num_rows($sqlPayrollDetails)>0){
     </script>
     <div class="row">
       <div class="col-lg-12">
-      <h4 style="text-indent: 10px;"><a href="?managepayroll&period=<?=$period;?>&company=<?=$company;?>"><i class="fa fa-arrow-left"></i> BACK</a> | <i class="fa fa-money"></i> EDIT PAYROLL</h4>
+      <h4 style="text-indent: 10px;"><a href="javascript:history.back();"><i class="fa fa-arrow-left"></i> BACK</a> | <i class="fa fa-money"></i> EDIT PAYROLL</h4>
     </div>
     </div>
     <?php
@@ -124,13 +124,14 @@ if(mysqli_num_rows($sqlPayrollDetails)>0){
                     $bdayleavehrs=0;
                     $bdayleaveamount=0;
                     $sqlAttendance=mysqli_query($con,"SELECT * FROM attendance WHERE logindate BETWEEN '$periodstart' AND '$periodend' AND idno='$idno' GROUP BY id ORDER BY logindate ASC");
-                    if(mysqli_num_rows($sqlAttendance)>0){
-                      while($attendance=mysqli_fetch_array($sqlAttendance)){
-                        $attendid=$attendance['id'];
-                        $sqlEmployeePayroll=mysqli_query($con,"SELECT * FROM employee_payroll WHERE idno='$idno'");
+                    if (mysqli_num_rows($sqlAttendance) > 0) {
+                      while ($attendance = mysqli_fetch_array($sqlAttendance)) {
+                          $attendid = $attendance['id'];
+                          $sqlEmployeePayroll = mysqli_query($con, "SELECT * FROM employee_payroll WHERE idno='$idno'");
+                          
                         $employeepayroll=mysqli_fetch_array($sqlEmployeePayroll);
+                        
                         $empsalary=$employeepayroll['salary'];
-
                         $logindate=$attendance['logindate'];
                         $loginam=$attendance['loginam'];
                         $logoutam=$attendance['logoutam'];
@@ -153,6 +154,8 @@ if(mysqli_num_rows($sqlPayrollDetails)>0){
                         $ot=0;
                         $pot=0;
                         $totalhrs=0;
+                        $empsalary = 0;
+                        
                         if($employeedetails['startshift']=="23:00:00"){
                           $reghrs=7;
                         }else{

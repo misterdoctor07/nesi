@@ -1,110 +1,67 @@
 <style>
-  .table-scroll {
-    position:relative;
-    width:100%;
-    margin:auto;
-    overflow:hidden;
-    border:1px solid #000;
-  }
-  .table-wrap {
-    width:100%;
-    overflow:auto;
-  }
-  .table-scroll table {
-    width:100%;
-    margin-top:auto;
-    border-collapse:separate;
-    border-spacing:0;
-  }
-  .table-scroll th, .table-scroll td {
-    padding:5px 10px;
-    border:1px solid #000;
-    background:#fff;
-    white-space:nowrap;
-    vertical-align:top;
-  }
-  .table-scroll thead, .table-scroll tfoot {
-    background:#f9f9f9;
-  }
-  .clone {
-    position:absolute;
-    top:0;
-    left:0;
-    pointer-events:none;
-  }
-  .clone th, .clone td {
-    visibility:hidden
-  }
-  .clone td, .clone th {
-    border-color:transparent
-  }
-  .clone tbody th {
-    visibility:visible;
-    color:red;
-  }
-  .clone .fixed-side {
-    border:1px solid #000;
-    background:#eee;
-    visibility:visible;
-  }
-  .clone thead, .clone tfoot{background:transparent;}
-  .btn {
-    padding: 10px 15px;
-    background-color: #13A14D;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.table-scroll {
+	position:relative;
+	max-width:100%;
+	margin:auto;
+	overflow:hidden;
+	border:1px solid #000;
 }
-
-.btn:hover {
-    background-color: #06753a;
+.table-wrap {
+	width:100%;
+	overflow:auto;
 }
+.table-scroll table {
+	width:100%;
+	margin-top:auto;
+	border-collapse:separate;
+	border-spacing:0;
+}
+.table-scroll th, .table-scroll td {
+	padding:5px 10px;
+	border:1px solid #000;
+	background:#fff;
+	white-space:nowrap;
+	vertical-align:top;
+}
+.table-scroll thead, .table-scroll tfoot {
+	background:#f9f9f9;
+}
+.clone {
+	position:absolute;
+	top:0;
+	left:0;
+	pointer-events:none;
+}
+.clone th, .clone td {
+	visibility:hidden
+}
+.clone td, .clone th {
+	border-color:transparent
+}
+.clone tbody th {
+	visibility:visible;
+	color:red;
+}
+.clone .fixed-side {
+	border:1px solid #000;
+	background:#eee;
+	visibility:visible;
+}
+.clone thead, .clone tfoot{background:transparent;}
 </style>
-
 <script src="lib/jquery/jquery.min.js"></script>
 <script>
-  jQuery(document).ready(function() {
-    jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');
-  });
-
-  function tableToExcel(tableID, filename = '') {
-            var dataType = 'application/vnd.ms-excel';
-            var tableSelect = document.getElementById(tableID);
-            var tableHTML = tableSelect.outerHTML;
-
-            // Create a download link
-            var downloadLink = document.createElement("a");
-            document.body.appendChild(downloadLink);
-
-            // Set the file name
-            filename = filename ? filename + '.xls' : 'attendance_summary.xls';
-
-            // Create a Blob with the table HTML
-            var blob = new Blob([tableHTML], {
-                type: dataType
-            });
-
-            // Create a URL for the Blob
-            var url = URL.createObjectURL(blob);
-            downloadLink.href = url;
-            downloadLink.download = filename;
-
-            // Trigger the download
-            downloadLink.click();
-
-            // Clean up
-            document.body.removeChild(downloadLink);
-        }
+jQuery(document).ready(function() {
+   jQuery(".main-table").clone(true).appendTo('#table-scroll').addClass('clone');
+ });
 </script>
-
 <?php
-  include('../config.php');
-  $dept=$_GET["dept"];
-  $startdate=$_GET['startdate'];
-  $enddate=$_GET['enddate'];
-  $sqlCompany=mysqli_query($con,"SELECT companyname FROM settings WHERE companycode='$dept'");
-  $comp=mysqli_fetch_array($sqlCompany);
+include('../config.php');
+$dept=$_GET["dept"];
+$startdate=$_GET['startdate'];
+$enddate=$_GET['enddate'];
+$sqlCompany=mysqli_query($con,"SELECT companyname FROM settings WHERE companycode='$dept'");
+$comp=mysqli_fetch_array($sqlCompany);
 ?>
         <div class="col-lg-12">
             <div class="content-panel">
@@ -123,19 +80,24 @@
                       <td align="center" width="5%">CODE</td>
                     </tr>
                     <tr>
-                      <td>Forgot to clock in/out w/ non-work related reason</td>
-                      <td align="center">0.2 (freq)</td>
-                      <td align="center">-</td>
-                      <td colspan="3"></td>
+                      <td>2 mins over-break (morning)</td>
+                      <td align="center">0.2</td>
+                      <td align="center">M</td>
+                      <td>2 mins over-break (both morning and lunch break)</td>
+                      <td align="center">0.4</td>
+                      <td align="center">B</td>
                       <td>Forgot to clock in (first shift) and failed to submit form</td>
                       <td align="center">0.2</td>
                       <td align="center">I-</td>
                     </tr>
                     <tr>
-                      <td>Late (First In)</td>
+                      <td>2 mins over-break (lunch)</td>
                       <td align="center">0.2</td>
-                      <td align="center">L</td>
-                      
+                      <td align="center">OB</td>
+                      <td>Forgot to clock in/out w/ non-work related reason</td>
+                      <td align="center">0.2 (freq)</td>
+                      <td align="center">-</td>
+                      <td colspan="3"></td>
                     </tr>
                   </table>
             </div>
@@ -146,24 +108,6 @@
             <br />
             <br />
             <br />
-            <div style="float:left;">
-								<form action="attendancemonitoringsummarymissed.php" method="GET">
-									<input type="hidden" name="dept" value="<?=$dept;?>">
-									<input type="hidden" name="startdate" value="<?=$startdate;?>">
-									<input type="hidden" name="enddate" value="<?=$enddate;?>">
-									<input type="text" name="searchme"> <input type="submit" name="submit" value="Search"> <a href="attendancemonitoringsummarymissed.php?dept=<?=$dept;?>&startdate=<?=$startdate;?>&enddate=<?=$enddate;?>"><button type="button">Refresh</button></a>
-								</form>
-						</div>
-            <div style="float:right; margin-bottom: 20px;">
-                <form>
-                    <input type="hidden" name="dept" value="<?=$dept;?>">
-                    <input type="hidden" name="startdate" value="<?=$startdate;?>">
-                    <input type="hidden" name="enddate" value="<?=$enddate;?>">
-                    <button onclick="tableToExcel('attendanceTable', 'Attendance_Summary_Missed_Report')" class="btn btn-success">EXPORT TO EXCEL</button>
-                </form>
-            </div>
-              <br>
-              <br>
             <div id="table-scroll" class="table-scroll">
             <div class="table-wrap">
                 <table class="main-table">
@@ -190,10 +134,10 @@
                         M
                       </th>
                       <th width="1.5%" rowspan="2">
-                        L
+                        OB
                       </th>
                       <th width="1.5%" rowspan="2">
-                        B
+                        L
                       </th>
                       <th width="1.5%" rowspan="2">
                         Total
@@ -228,20 +172,7 @@
                     <?php
                     $x=1;
                     mysqli_query($con,"SET NAMES 'utf8'");
-                    if(isset($_GET['submit'])){
-											$dept=$_GET['dept'];
-											$startdate=$_GET['startdate'];
-											$enddate=$_GET['enddate'];
-											$searchme=$_GET['searchme'];
-											$sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep 
-                      LEFT JOIN employee_details ed ON ed.idno=ep.idno 
-                      WHERE ed.status NOT LIKE '%RESIGNED%' AND ed.company='$dept' AND (ep.lastname LIKE '%$searchme%' OR ep.firstname LIKE '%$searchme%') 
-                      ORDER BY ed.department ASC");
-										}else{
-											$sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep 
-                      LEFT JOIN employee_details ed ON ed.idno=ep.idno WHERE ed.status NOT LIKE '%RESIGNED%' AND ed.company='$dept' 
-                      ORDER BY ed.department ASC");
-										}
+                      $sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep LEFT JOIN employee_details ed ON ed.idno=ep.idno WHERE ed.status NOT LIKE '%RESIGNED%' AND ed.company='$dept' ORDER BY ed.department ASC");
                       if(mysqli_num_rows($sqlEmployee)>0){
                         while($company=mysqli_fetch_array($sqlEmployee)){
                           $shift=date('h:i A',strtotime($company['startshift']))." - ".date('h:i A',strtotime($company['endshift']));
@@ -254,15 +185,15 @@
                             $department="";
                           }
                           echo "<tr>";
-                            echo "<td class='fixed-side'>$x.</td>";
-                            echo "<td class='fixed-side'>$company[lastname], $company[firstname] $company[middlename] $company[suffix]</td>";
-                            echo "<td align='center' class='fixed-side'>$department</td>";
-                            $month=date('m',strtotime($startdate));
-                            $year=date('Y',strtotime($startdate));
+                                echo "<td class='fixed-side'>$x.</td>";
+                                echo "<td class='fixed-side'>$company[lastname], $company[firstname] $company[middlename] $company[suffix]</td>";
+                                echo "<td align='center' class='fixed-side'>$department</td>";
+                                $month=date('m',strtotime($startdate));
+                                $year=date('Y',strtotime($startdate));
 
-                            $datearray=date('d',strtotime($enddate));
-                            $m="";$l="";$b="";$il="";$li="";
-                            for($i=1;$i<=$datearray;$i++){
+                                $datearray=date('d',strtotime($enddate));
+                                $m="";$l="";$b="";$il="";$li="";
+                                for($i=1;$i<=$datearray;$i++){
                               $rundate=$year."-".$month."-".$i;
                               $day=date('D',strtotime($rundate));
                               if($day=="Sun"){
@@ -276,15 +207,15 @@
                                 $remarks=$rem['remarks'];
                                 if($remarks=="Code L"){
                                   $l++;
-                                  $remarks=str_replace('Code ','',$remarks)."-";
+                                  $remarks=str_replace('Code ','',$remarks)."";
                                   $color="background-color:#f4c7c3;";
-                                }elseif($remarks=="Code I"){ //edited from Code ML
+                                }elseif($remarks=="Code I"){
                                   $il++;
-                                  $remarks=str_replace('Code ','',$remarks)."-";
+                                  $remarks=str_replace('Code ','',$remarks)."";
                                   $color="background-color:#f4c7c3;";
                                 }elseif($remarks=="Code OB"){
                                     $l++;
-                                    $remarks=str_replace('Code ','',$remarks)."-";
+                                    $remarks=str_replace('Code ','',$remarks)."";
                                     $color="background-color:#f4c7c3;";
                                 }else{
                                   $remarks="-";

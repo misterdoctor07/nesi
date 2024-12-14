@@ -48,3 +48,4 @@
 			echo "<script>alert('Authentication failed!');window.location='index.php';</script>";			
 		}
 	}
+?>

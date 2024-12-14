@@ -4,7 +4,7 @@
               <h4><a href="?main"><i class="fa fa-arrow-left"></i> HOME</a> | <i class="fa fa-file-text"></i> MANAGE LEAVE <a href="?applyleave" style="float:right;" class="btn btn-primary"><i class="fa fa-plus"></i> Apply Leave</a></h4>              
             </div>
               <div class="panel-body">
-                <table class="table table-bordered table-striped table-condensed" id="hidden-table-info">
+                <table class="table table-bordered table-striped table-condensed">
                   <thead>
                     <tr>
                       <th width="2%">No.</th>
@@ -57,7 +57,7 @@
                     <?php
                 }
             } else {
-                echo "<tr><td colspan='9' align='center'>No records found!</td></tr>";
+                echo "<tr><td colspan='12' align='center'>No records found!</td></tr>";
             }
             ?>
                   </tbody>
@@ -84,30 +84,30 @@ if (isset($_GET['cancel'])) {
 
 
         if ($sqlCancel) {
-            // // Update leave credits based on leave type
-            // switch ($leaveType) {
-            //     case 'VL':
-            //         $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET vlused = vlused - $numberOfDays WHERE idno = '$idno'");
-            //         break;
-            //     case 'SL':
-            //         $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET slused = slused - $numberOfDays WHERE idno = '$idno'");
-            //         break;
-            //     case 'PTO':
-            //         $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET ptoused = ptoused - $numberOfDays WHERE idno = '$idno'");
-            //         break;
-            //     case 'BLP':
-            //         $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET blp_used = blp_used - $numberOfDays WHERE idno = '$idno'");
-            //         break;
-            //     case 'EO':
-            //         $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET eo_used = eo_used - $numberOfDays WHERE idno = '$idno'");
-            //         break;                                      
-            //     default:
-            //         echo "<script>alert('Leave type not recognized. No credits updated.');</script>";
-            //         break;
-            // }
+            // Update leave credits based on leave type
+            switch ($leaveType) {
+                case 'VL':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET vlused = vlused - $numberOfDays WHERE idno = '$idno'");
+                    break;
+                case 'SL':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET slused = slused - $numberOfDays WHERE idno = '$idno'");
+                    break;
+                case 'PTO':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET ptoused = ptoused - $numberOfDays WHERE idno = '$idno'");
+                    break;
+                case 'BLP':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET blp_used = blp_used - $numberOfDays WHERE idno = '$idno'");
+                    break;
+                case 'EO':
+                    $sqlUpdateCredits = mysqli_query($con, "UPDATE leave_credits SET eo_used = eo_used - $numberOfDays WHERE idno = '$idno'");
+                    break;                                      
+                default:
+                    echo "<script>alert('Leave type not recognized. No credits updated.');</script>";
+                    break;
+            }
             
             echo "<script>";
-            echo "alert('Leave successfully cancelled!');";
+            echo "alert('Leave successfully cancelled and credits updated!');";
             echo "window.location='?manageleave';";
             echo "</script>";
         } else {

@@ -1,24 +1,24 @@
 <div class="col-lg-12">
-  <div class="content-panel">
-    <div class="panel-heading">
-      <h4><a href="?main"><i class="fa fa-arrow-left"></i> HOME</a> | <i class="fa fa-file-text"></i> EMPLOYEE LEAVE CREDITS</h4>
-    </div>
-    <div class="panel-body">
-      <table class="table table-bordered table-striped table-condensed" id="hidden-table-info">
-        <thead>
-          <tr>
-            <th width="3%">No.</th>
-            <th>Emp ID</th>
-            <th>Employee Name</th>
-            <th>Department</th>
-            <th>Eligibility</th>
-            <th>Length of Service</th>
-            <th>Period (From - Through)</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
+            <div class="content-panel">
+              <div class="panel-heading">
+              <h4><a href="?main"><i class="fa fa-arrow-left"></i> HOME</a> | <i class="fa fa-file-text"></i> EMPLOYEE LEAVE CREDITS</h4>
+            </div>
+              <div class="panel-body">
+                <table class="table table-bordered table-striped table-condensed" id="hidden-table-info">
+                  <thead>
+                    <tr>
+                      <th width="3%">No.</th>
+                      <th>Emp ID</th>
+                      <th>Employee Name</th>
+                      <th>Department</th>
+                      <th>Eligibility</th>
+                      <th>Length of Service</th>
+                      <th>Period (From - Through)</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
                     $x=1;
                       $sqlEmployee=mysqli_query($con,"SELECT ep.*,ed.* FROM employee_profile ep LEFT JOIN employee_details ed ON ed.idno=ep.idno WHERE ed.status NOT LIKE '%RESIGNED%' ORDER BY ep.lastname ASC");
                       if(mysqli_num_rows($sqlEmployee)>0){
@@ -27,7 +27,7 @@
                             $status="<span class='label label-success label-mini'>$company[status]</span>";
                           }else{
                             $status="<span class='label label-warning label-mini'>$company[status]</span>";
-              }
+                          }
                           $shift=date('h:i A',strtotime($company['startshift']))." - ".date('h:i A',strtotime($company['endshift'])); 
                           $dateregular=date('F d, Y',strtotime($company['dateofhired'])); // dria mag update
                           $dateofregular=date('F d, Y',strtotime(strtotime($company['dateofregular']))); 
@@ -40,7 +40,7 @@
                             $department=$dept['department'];    
                           }else{
                             $department="";
-              }
+                          }                         
                           // Assuming $company['dateofhire'] is in 'Y-m-d' format
 
                             $hireDate = new DateTime($company['dateofhired']);
@@ -49,13 +49,13 @@
                             if ($hireDate <= $thresholdDate) {
                                 // Logic for dateofhire on or before July 2020
                                 $dhire = new DateTime($company['dateofregular']); 
-              $dnow = new DateTime(date('Y-m-d'));
-              $interval = $dhire->diff($dnow);
-              $years = $interval->y;
-              $month = $interval->m;
-              $days = $interval->d;
-              $periodfrom = date('F d, Y', strtotime($years . " years", strtotime($company['dateofregular'])));
-              $periodto = date('F d, Y', strtotime('1 years', strtotime($periodfrom)));
+                                $dnow = new DateTime(date('Y-m-d'));
+                                $interval = $dhire->diff($dnow);
+                                $years = $interval->y;
+                                $month = $interval->m;
+                                $days = $interval->d;
+                                $periodfrom = date('F d, Y', strtotime($years . " years", strtotime($company['dateofregular'])));
+                                $periodto = date('F d, Y', strtotime('1 years', strtotime($periodfrom)));
                             } else {
                                 // Logic for dateofhire on or after August 2020
                                 $dhire = new DateTime($company['dateofhired']);
@@ -190,7 +190,7 @@ if (mysqli_num_rows($sqlCheckCredits) > 0) {
 
 }
 
-                            echo "<tr>";
+                          echo "<tr>";
                             echo "<td>$x.</td>";
                             echo "<td>$company[idno]</td>";
                             echo "<td>$company[lastname], $company[firstname] $company[middlename] $company[suffix]</td>";

@@ -103,30 +103,18 @@ function SubmitDetails(){
                     <td align="center">LOGOUT</td>
                 </tr>
                 <?php
-                $sqlShift = mysqli_query($con, "SELECT * FROM employee_details where idno='$idno'");
-                if(mysqli_num_rows($sqlShift) > 0){
-                    $startshift =  'startshift';
-                }
                 // Fetch attendance data based on the selected time frame
                 $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance WHERE logindate BETWEEN '$startDate' AND '$endDate' AND idno='$idno'");
                 if (mysqli_num_rows($sqlAttendance) > 0) {
                     while ($attend = mysqli_fetch_array($sqlAttendance)) {
                         echo "<tr>";
                             echo "<td align='center'>" . date('F d, Y', strtotime($attend['logindate'])) . "</td>"; // Display attendance date
-                            echo "<td align='center'>" . ($attend['loginam'] ? $attend['loginam'] : '-') . "</td>";
-                            if($attend['loginam'] > $startshift|| $attend['loginam']=="00:00:00"){
-                                $color="style='color:red;'";
-                              }else{
-                                $color="";
-                              }
-                              if($attend['loginpm']=="00:00:00" || $attend['logoutpm']=="00:00:00" || $attend['logoutam']=="00:00:00"){
-                                $color1="style='color:red;'";
-                              }else{
-                                $color1="";
-                              }
-                            echo "<td align='center'>" . ($attend['logoutam'] ? $attend['logoutam'] : '-') . "</td>";
-                            echo "<td align='center'>" . ($attend['loginpm'] ? $attend['loginpm'] : '-') . "</td>";
-                            echo "<td align='center'>" . ($attend['logoutpm'] ? $attend['logoutpm'] : '-') . "</td>";
+                            
+                            // Format loginam and logoutam to 12-hour format
+                            echo "<td align='center'>" . ($attend['loginam'] ? date('h:i A', strtotime($attend['loginam'])) : '-') . "</td>";
+                            echo "<td align='center'>" . ($attend['logoutam'] ? date('h:i A', strtotime($attend['logoutam'])) : '-') . "</td>";
+                            echo "<td align='center'>" . ($attend['loginpm'] ? date('h:i A', strtotime($attend['loginpm'])) : '-') . "</td>";
+                            echo "<td align='center'>" . ($attend['logoutpm'] ? date('h:i A', strtotime($attend['logoutpm'])) : '-') . "</td>";
                         echo "</tr>";
                     }
                 } else {

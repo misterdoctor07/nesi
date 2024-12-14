@@ -101,10 +101,12 @@ date_default_timezone_set("Asia/Manila");
         <!--  notification end -->
       </div>
       <div class="top-menu">
-        <ul class="nav pull-right top-menu">
-          <li><a class="logout" href="logout.php" onclick="return confirm('Do you wish to logout?');return false;">Logout</a></li>
-        </ul>
-      </div>
+    <ul class="nav pull-right top-menu">
+      
+      <li><a class="logout" style="border-radius: 15px 15px;" href="logout.php" onclick="return confirm('Do you wish to logout?');return false;">Logout</a></li>
+    </ul>
+    <li style="float: right; margin-right: 40px; margin-top: 20px; "><a class="attendance_out" href="/hris/attendance/" style=" background-color:#7BCCB5; padding: 5px 15px; font-size: 13px; color: white; border: 1px solid #007bff; border-radius: 15px 15px; border-color: #7BCCB5;">Attendance</a></li>
+  </div>
     </header>
     <!--header end-->
     <!-- **********************************************************************************************************************************************************
@@ -112,10 +114,31 @@ date_default_timezone_set("Asia/Manila");
         *********************************************************************************************************************************************************** -->
     <!--sidebar start-->
     <aside>
-      <div id="sidebar" class="nav-collapse ">
-        <!-- sidebar menu start-->
-        <ul class="sidebar-menu" id="nav-accordion">
-          <p class="centered"><i class="fa fa-user fa-4x"></i></p>
+    <div id="sidebar" class="nav-collapse ">
+    <!-- sidebar menu start-->
+    <ul class="sidebar-menu" id="nav-accordion">
+        <?php
+        // Fetch user ID
+        $userId = $_SESSION['idno'];
+        
+        // Check if the user has an uploaded profile picture
+        $image = "path/to/default/image.jpg"; // Default image
+        $target_dir = "../Employees/";
+
+        // Check for profile picture in multiple formats
+        if (file_exists($target_dir . $userId . ".png")) {
+            $image = $target_dir . $userId . ".png";
+        } elseif (file_exists($target_dir . $userId . ".jpg")) {
+            $image = $target_dir . $userId . ".jpg";
+        } elseif (file_exists($target_dir . $userId . ".jpeg")) {
+            $image = $target_dir . $userId . ".jpeg";
+        }
+        ?>
+
+        <!-- Display profile picture -->
+        <p class="centered">
+            <img src="<?= $image; ?>" alt="Profile Picture" class="img-circle" width="80" height="80">
+        </p>
           <h5 class="centered"><?=$fullname;?></h5>
           <li class="mt">
             <a href="dashboard.php?main">
@@ -127,20 +150,20 @@ date_default_timezone_set("Asia/Manila");
             <a href="javascript:;">
               <i class=" fa fa-file-text-o"></i>
               <span>Leave Credits</span>
-              <span id="credit-notification-badge" class="badge" style="color: white; background-color: red"></span>
+              <span id="credit-notification-badge" class="badge" style="color: white; background-color:red"></span>
               </a>
 
             <ul class="sub">
               <li><a href="dashboard.php?applyleave">Apply Leave</a></li>
               <li><a href="dashboard.php?manageleave">Manage Leave</a></li>
               <li <?=$view;?>><a href="dashboard.php?manageleaveapplication">Leave Applications 
-                <span id="leave-notification-badge" class="badge"></span>
+                <span id="leave-notification-badge" class="badge" style="color: white; background-color:red"></span>
               </a></li>
               <li <?=$view;?>><a href="dashboard.php?manageovertimeapplication">OT Applications 
-                <span id="ot-notification-badge" class="badge"></span>
+                <span id="ot-notification-badge" class="badge" style="color: white; background-color:red"></span>
               </a></li>
               <li <?=$view;?>><a href="dashboard.php?managemissedlogapplication">Missed Log Applications 
-                <span id="ml-notification-badge" class="badge"></span>
+                <span id="ml-notification-badge" class="badge" style="color: white; background-color:red"></span>
               </a></li>
             </ul>
           </li>
@@ -159,7 +182,7 @@ date_default_timezone_set("Asia/Manila");
           <li>
             <a href="dashboard.php?attendance">
               <i class="fa fa-clock-o"></i>
-              <span>Attendance</span>
+              <span>Log Details</span>
               </a>
           </li>
           <li>
@@ -239,7 +262,7 @@ date_default_timezone_set("Asia/Manila");
             Licensing information: https://templatemag.com/license/
           -->
           Created with Dashio template by <a href="#">Eczekiel H. Aboy</a>
-          <p>Updated by UM Interns 2024</p>
+          <p>Updated by UM Interns Batch 2 • M.I.Misa - J.M.Lapeceros - A.J.Lawagon</p>
         </div>
         <a href="index.html#" class="go-top">
           <i class="fa fa-angle-up"></i>
@@ -389,18 +412,3 @@ $(document).ready(function() {
 </body>
 
 </html>
-
-<style>
-
-.badge{
-  position: absolute;
-  top: 10px;
-  right: 18px;
-  transform: translate(50%, -50%);
-  color: white;
-  background-color: red;
-  border-radius: 50%;
-  padding: 4px 8px;
-  font-size: 12px;
-}
-</style>

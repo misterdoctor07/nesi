@@ -28,8 +28,6 @@ include('config.php');
   <link href="css/style-responsive.css" rel="stylesheet">
   <script src="lib/chart-master/Chart.js"></script>
 
-
-
   <!-- =======================================================
     Template Name: Dashio
     Template URL: https://templatemag.com/dashio-bootstrap-admin-template/
@@ -76,7 +74,7 @@ include('config.php');
             <a href="" data-toggle="modal" data-target="#myModal" data-id="HR" draggable="true" class="login">
               <i class="fa fa-users"></i>
               <span>Human Resource</span>
-            </a>
+              </a>
           </li>
           <li>
             <a href="" data-toggle="modal" data-target="#myModal" data-id="ACCOUNTING" draggable="true" class="login">
@@ -85,13 +83,13 @@ include('config.php');
               </a>
           </li>
           <li>
-            <a href="employeeportal/" target="_blank">
+          <a href="/hris/employeeportal/" >
               <i class="fa fa-user"></i>
               <span>Employee Portal</span>
               </a>
           </li>
           <li>
-            <a href="attendance/" target="_blank">
+          <a href="/hris/attendance/" >
               <i class="fa fa-clock-o"></i>
               <span>Attendance</span>
               </a>
@@ -175,7 +173,7 @@ include('config.php');
 
             // now return
             return $w;
-          }
+        }
           mysqli_query($con,"SET NAMES 'utf8'");
           if(isset($_GET['safety'])){
             $title="SAFETY PROTOCOLS";
@@ -221,14 +219,7 @@ include('config.php');
               ?>
           <div class="col-md-10 col-md-offset-1 mt mb">
             <div class="accordion" id="accordion2">
-            <?php
-
-          if ($sqlResult === false) {
-            // Query failed, handle the error
-            echo "Error: " . mysqli_error($con);
-            // Optionally, you might want to exit or handle the error further
-            exit();
-          }
+                <?php
                 $x=1;
                 if(mysqli_num_rows($sqlResult)>0){
                   while($result=mysqli_fetch_array($sqlResult)){
@@ -297,8 +288,65 @@ include('config.php');
         </div>
         <!--  /row -->
       </section>
-    </section>
       <!-- /wrapper -->
+    </section>
+    <!-- <section id="main-content">
+      <section class="wrapper site-min-height">
+        <div class="row">
+          <div class="col-lg-12">
+          </div>
+        </div>
+        <div id="morris">
+          <div class="row mt">
+            <div class="col-lg-8">
+              <div class="content-panel">
+                <h4>Employee Statistics</h4>
+                <div class="panel-body">
+                  <div id="hero-bar" class="graph"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 col-sm-4 mb">
+                <div class="green-panel pn">
+                  <div class="green-header">
+                    <h5>DEPARTMENT</h5>
+                  </div>
+                  <div class="panel-body">
+                    <?php
+                    $sqlCompany=mysqli_query($con,"SELECT * FROM department");
+                    $company=mysqli_num_rows($sqlCompany);
+                    ?>
+                  <h2><?=$company;?></h2>
+                </div>
+                  <h3>TOTAL DEPARTMENT</h3>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-4 mb">
+                <div class="grey-panel pn donut-chart">
+                  <div class="grey-header">
+                    <h5>JOB TITLE</h5>
+                  </div>
+                  <div class="panel-body">
+                    <?php
+                    $sqlCompany=mysqli_query($con,"SELECT * FROM jobtitle");
+                    $company=mysqli_num_rows($sqlCompany);
+                    ?>
+                  <h2><?=$company;?></h2>
+                </div>
+                  <h4>TOTAL JOB TITLES</h4>
+                </div>
+          </div>
+
+        </div>                       -->
+          <!-- /col-lg-9 END SECTION MIDDLE -->
+          <!-- **********************************************************************************************************************************************************
+              RIGHT SIDEBAR CONTENT
+              *********************************************************************************************************************************************************** -->
+          <!-- /col-lg-3 -->
+        <!-- </div> -->
+        <!-- /row -->
+      <!-- </section>
+    </section> -->
     <!--main content end-->
     <!--footer start-->
     <footer class="site-footer fixed">
@@ -314,7 +362,6 @@ include('config.php');
             Licensing information: https://templatemag.com/license/
           -->
           Created with Dashio template by <a href="#">Eczekiel H. Aboy</a>
-          <p>Updated by UM Interns 2024</p>
         </div>
         <a href="index.html#" class="go-top">
           <i class="fa fa-angle-up"></i>
@@ -324,33 +371,47 @@ include('config.php');
     <!--footer end-->
   </section>
               <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
+                <div class="modal-dialog">
                   <div class="modal-content">
                     <form name="f12" action="authentication.php" method="POST">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="myModalLabel">USER LOGIN <input type="button" id="dept" style="border:0; width:300px;color:white; background-color:transparent; text-align:left;"/></h4>
-                      </div>
-                      <div class="modal-body">
-                        <div id="login-page">
-                          <div class="login-wrap">
-                            <input type="text" class="form-control" placeholder="User ID" name="username" autofocus>
-                            <br>
-                            <input type="password" class="form-control" placeholder="Password" name="password">
-                            <input type="hidden" name="access" id="dept">
-                            <label class="checkbox"></label>
-                            <button class="btn btn-theme btn-block" type="submit"><i class="fa fa-lock"></i> SIGN IN</button> 
-                            <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Close</button>
-                          </div>
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                      <h4 class="modal-title" id="myModalLabel">USER LOGIN <input type="button" id="dept" style="border:0; width:300px;color:white; background-color:transparent; text-align:left;"/></h4>
+                    </div>
+                    <div class="modal-body">
+                      <!-- <fieldset>
+                        <div class="form-group">
+                          <input type="text" class="form-control" placeholder="Username" name="username" autofocus style="height: 50px; font-size: 20px;" required>
                         </div>
-                      </div>
+                        <div class="form-group">
+                          <input type="password" class="form-control" placeholder="Password" name="password" style="height: 50px; font-size: 20px;" required>
+                        </div>
+
+                      </fieldset> -->
+                      <div id="login-page">
+        <div class="login-wrap">
+          <input type="text" class="form-control" placeholder="User ID" name="username" autofocus>
+          <br>
+          <input type="password" class="form-control" placeholder="Password" name="password">
+          <input type="hidden" name="access" id="dept">
+          <label class="checkbox">
+
+            </label>
+          <button class="btn btn-theme btn-block" type="submit"><i class="fa fa-lock"></i> SIGN IN</button> <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Close</button>
+        </div>
+  </div>
+                    </div>
+                    <!-- <div class="modal-footer">
+
+                      <button type="button" class="btn btn-primary">Save changes</button>
+                    </div> -->
                     </form>
                   </div>
                 </div>
               </div>
-              
   <!-- js placed at the end of the document so the pages load faster -->
   <script src="lib/jquery/jquery.min.js"></script>
+
   <script src="lib/bootstrap/js/bootstrap.min.js"></script>
   <script class="include" type="text/javascript" src="lib/jquery.dcjqaccordion.2.7.js"></script>
   <script src="lib/jquery.scrollTo.min.js"></script>
@@ -426,8 +487,8 @@ include('config.php');
       console.log('nav ' + nav + ' to: ' + to.month + '/' + to.year);
     }
   </script>
-        <script>
-             $(document).on("click", ".login", function () {
+  <script>
+                  $(document).on("click", ".login", function () {
              var myBookId = $(this).data('id');
              $(".modal-body #dept").val( myBookId );
              $(".modal-header #dept").val("("+myBookId+" DEPARTMENT)");
@@ -436,7 +497,18 @@ include('config.php');
              // $('#addBookDialog').modal('show');
           });
         </script>
-        <?php
+        <script src="lib/jquery/jquery.min.js"></script>
+  <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+  <script class="include" type="text/javascript" src="lib/jquery.dcjqaccordion.2.7.js"></script>
+  <script src="lib/jquery.scrollTo.min.js"></script>
+  <script src="lib/jquery.nicescroll.js" type="text/javascript"></script>
+  <script src="lib/raphael/raphael.min.js"></script>
+  <script src="lib/morris/morris.min.js"></script>
+  <!--common script for all pages-->
+  <script src="lib/common-scripts.js"></script>
+  <!--script for this page-->
+  <!--script src="lib/morris-conf.js"></!--script-->
+  <?php
           $probationary=0;
           $regular=0;
           $resigned=0;
@@ -472,9 +544,6 @@ include('config.php');
         hideHover: 'auto',
         barColors: ['#ac92ec']
       });
-  </script>
-  <script>
-    
   </script>
 </body>
 

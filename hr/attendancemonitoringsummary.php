@@ -199,7 +199,7 @@
             <input type="hidden" name="dept" value="<?=$dept;?>">
             <input type="hidden" name="startdate" value="<?=$startdate;?>">
             <input type="hidden" name="enddate" value="<?=$enddate;?>">
-            <button onclick="tableToExcel('attendanceTable', '<?= date('F', strtotime($startdate)); ?>_<?= str_replace(' ', '_', $comp['companyname']); ?>_Attendance_Summary_Report')" class="btn btn-success">EXPORT TO EXCEL</button>
+            <button onclick="tableToExcel('attendanceTable', 'Attendance_Summary_Report')" class="btn btn-success">EXPORT TO EXCEL</button>
         </form>
     </div>
       <br><br>
@@ -371,81 +371,86 @@
                               }else{
                                 $nowork="";
                               }
-                                // Fetch attendance record
+                              // Fetch attendance record
                              $sqlAttendance = mysqli_query($con, " SELECT a.*, o.* FROM attendance a LEFT JOIN points o ON a.idno = o.idno  WHERE a.logindate = '$rundate' AND a.idno = '{$company['idno']}'");
                              if (mysqli_num_rows($sqlAttendance) > 0) {
                               $rem = mysqli_fetch_array($sqlAttendance);
-                              $previousRemarks = $rem['previousRemarks']; // Get previous remarks from the database
-                              $remarks = $rem['remarks'];                 // Current remarks from the database
-                              $offense = $rem['offense'];                 // Category of the offense (e.g., TARDY, ABSENT, etc.)
-                              $color = "";
-                              $newRemark = $remarks;                      // Initialize with the current remark by default
                           
-                              if ($offense == "15") {
-                                  $remarks = date('h:i', strtotime($rem['loginam'])) . "-" . str_replace('', '', "D");
-                                  $color = "background-color:#ffcccc"; // Late category could have a different color
-                                  $d++;
-                              } elseif ($offense == "17") {
-                                  $remarks = date('h:i', strtotime($rem['loginam'])) . "-" . str_replace('', '', "F");
-                                  $color = "background-color:#ffcccc"; // Late category could have a different color
-                                  $f++;
-                              } elseif ($offense == "12") {
-                                  $remarks = "CI" . "-" . str_replace('', '', "A");
-                                  $color = "background-color:#ffcccc"; // Late category could have a different color
-                                  $a++;
-                              } elseif ($offense == "13") {
-                                  $remarks = "CI" . "-" . str_replace('', '', "B");
-                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                              $previousRemarks = $rem['previousRemarks']; // Retrieve saved remarks
+                              $remarks = $rem['remarks'];                 // Current remarks
+                              $offense = $rem['offense'];                 // Offense type
+                              $color = "";                                // Default color
+                              $newRemark = $remarks;                      // Start with current remark
+                          
+                              // Update remarks and color based on conditions
+                              if ($remarks == "Code D" || strpos($remarks, "-D") !== false) {
+                                // If the remark is "Code D" or already in the format "Time - D"
+                                if ($remarks == "Code D") {
+                                    $remarks = date('h:i', strtotime($rem['loginam'])) . "-D";
+                                }
+                                $color = "background-color:#ffcccc;";
+                                $d++;
+                            }
+                            elseif ($remarks == "Code F"|| strpos($remarks, "-F") !== false) {
+                              if ($remarks == "Code F") {
+                                $remarks = date('h:i', strtotime($rem['loginam'])) . "-F";
+                            }
+                            $color = "background-color:#ffcccc;";
+                            $f++;
+                                  
+                              } elseif ($remarks == "Code A"|| strpos($remarks, "-A") !== false) {
+                                if ($remarks == "Code A") {
+                                  $remarks = date('h:i', strtotime($rem['loginam'])) . "-A";
+                              }
+                              $color = "background-color:#ffcccc;";
+                              $a++;
+                                    
+                                } elseif ($remarks == "Code B") {
+                                  $remarks = "CI-B";
+                                  $color = "background-color:#ffcccc;";
                                   $b++;
-                              } elseif ($offense == "63") {
-                                  $remarks = "CI" . "-" . str_replace('', '', "C");
-                                  $color = "background-color:#ffcccc"; // Late category could have a different color
+                              } elseif ($remarks == "Code C") {
+                                  $remarks = "CI-C";
+                                  $color = "background-color:#ffcccc;";
                                   $c++;
                               } elseif (in_array($remarks, ["Code L", "Code I", "Code OB"])) {
                                   $remarks = "P";
-                                  $color = "";
+                                  $color = ""; // No color for these remarks
                               } elseif (in_array($remarks, ["PTO", "VL", "SL", "BLP", "AWOL", "CI-A", "CI"])) {
-                                  // Determine the new remark for "SL"
                                   $remarks = ($remarks == "SL") ? "SL-A" : $remarks;
                           
-                                  // Increment the appropriate counter
-                                  if ($remarks == "PTO") {
-                                      $pto++;
-                                  } elseif ($remarks == "VL") {
-                                      $vl++;
-                                  } elseif ($remarks == "SL") {
-                                      $sl++; // Increment SL-A counter for converted SL
-                                  } elseif ($remarks == "BLP") {
-                                      $blp++;
-                                  }
+                                  if ($remarks == "PTO") $pto++;
+                                  elseif ($remarks == "VL") $vl++;
+                                  elseif ($remarks == "SL") $sl++;
+                                  elseif ($remarks == "BLP") $blp++;
                           
-                                  // Set color based on remark
                                   $color = "background-color:#bdd6ee;";
                               }
                           
-                              // Check and update only if previousRemarks is empty or null
+                              // Update `previousRemarks` if it's empty
                               if (empty($previousRemarks)) {
                                   mysqli_query($con, "UPDATE attendance 
                                                       SET previousRemarks='$remarks' 
                                                       WHERE logindate='$rundate' AND idno='{$company['idno']}'");
-                                  $previousRemarks = $remarks; // Retain the initial previousRemarks
+                                  $previousRemarks = $remarks;
                               }
                           
-                              // Update current remarks if they have changed
+                              // Update `remarks` if it has changed
                               if ($remarks !== $rem['remarks']) {
                                   mysqli_query($con, "UPDATE attendance 
                                                       SET remarks='$remarks' 
                                                       WHERE logindate='$rundate' AND idno='{$company['idno']}'");
                               }
                           } else {
-                              // If no record is found, initialize variables
                               $remarks = "";
                               $previousRemarks = "";
                               $color = "";
                           }
-                                if ($remarks === "P") {
-                                  $p++; // Increment for general "P"
-                                }
+                          
+                          // Increment "P" if necessary
+                          if ($remarks === "P") {
+                              $p++;
+                          }
                    /// Fetch attendance for the specific date and employee
                    $sqlAttendance = mysqli_query($con, "SELECT * FROM attendance WHERE logindate='$rundate' AND idno='{$company['idno']}'");
 

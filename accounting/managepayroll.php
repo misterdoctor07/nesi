@@ -125,7 +125,7 @@
                             echo "<td align='right'>$netpay</td>";
                             ?>
                             <td align="center">
-                              <a href="?editpayroll&idno=<?=$idno?>&period=<?=$id;?>&company=<?=$comp['company'];?>" class="btn btn-primary btn-xs" title="Edit Payroll" target="_blank"><i class='fa fa-pencil'></i></a>
+                              <a href="?editpayroll&idno=<?=$idno?>&period=<?=$id;?>&company=<?=$comp['company'];?>" class="btn btn-primary btn-xs" title="Edit Payroll" target=""><i class='fa fa-pencil'></i></a>
                               <?php
                               if($payroll_id==""){
 

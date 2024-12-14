@@ -109,14 +109,37 @@
             $referredby="";
             $effectivity="";
           }
-          $dhire=new DateTime($details['dateofhired']);
-          $dnow=new DateTime(date('Y-m-d'));
-          $interval=$dhire->diff($dnow);
-          $years=$interval->y;
-          $month=$interval->m;
-          $days=$interval->d;
-          $periodfrom=date('F d, Y',strtotime($years." years",strtotime($details['dateofregular'])));
-          $periodto=date('F d, Y',strtotime('1 years',strtotime($periodfrom)));
+          if (!empty($details['dateofhired']) && !empty($details['dateofregular'])) {
+            $hireDate = new DateTime($details['dateofhired']);
+            $thresholdDate = new DateTime('2020-07-31'); // End of July 2020
+        
+            if ($hireDate <= $thresholdDate) {
+                // Logic for dateofhire on or before July 2020
+                $dhire = new DateTime($details['dateofregular']);
+                $dnow = new DateTime(date('Y-m-d'));
+                $interval = $dhire->diff($dnow);
+                $years = $interval->y;
+                $month = $interval->m;
+                $days = $interval->d;
+                $periodfrom = date('F d, Y', strtotime($years . " years", strtotime($details['dateofregular'])));
+                $periodto = date('F d, Y', strtotime('1 years', strtotime($periodfrom)));
+            } else {
+                // Logic for dateofhire on or after August 2020
+                $dhire = new DateTime($details['dateofhired']);
+                $dnow = new DateTime(date('Y-m-d'));
+                $interval = $dhire->diff($dnow);
+                $years = $interval->y;
+                $month = $interval->m;
+                $days = $interval->d;
+                $periodfrom = date('F d, Y', strtotime($years . " years", strtotime($details['dateofhired'])));
+                $periodto = date('F d, Y', strtotime('1 years', strtotime($periodfrom)));
+            }
+        } else {
+            // Fallback logic if dates are missing
+            $years = $month = $days = 0;
+            $periodfrom = $periodto = '';
+        }
+        
 
           $sqlLeaveCredits=mysqli_query($con,"SELECT * FROM leave_credits WHERE idno='$idno'");
           if(mysqli_num_rows($sqlLeaveCredits)>0){

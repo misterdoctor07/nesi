@@ -194,19 +194,17 @@ if (isset($_GET['disapproved'])) {
                                 echo "<td align='left'>{$company['remarks']}</td>";
                                 ?>
                                 <td align="center">
-                                    <?php if ($statusText === 'Pending'){ ?>
-                                        <a href="?manageleaveapplication&id=<?= $company['laid']; ?>&approved" class="btn btn-success btn-xs" title="Approve" 
-                                        onclick="return confirm('Do you wish to approve this leave application?');">
-                                        <i class='fa fa-thumbs-up'></i>
-                                        </a>
+                                    <a href="?manageleaveapplication&id=<?= $company['laid']; ?>&approved" class="btn btn-success btn-xs" title="Approve" 
+                                       onclick="return confirm('Do you wish to approve this leave application?');">
+                                       <i class='fa fa-thumbs-up'></i>
+                                    </a>
 
-                                        <a href="?manageleaveapplication&id=<?= $company['laid']; ?>&disapproved" class="btn btn-danger btn-xs" title="Disapprove" 
-                                        onclick="return confirm('Do you wish to disapprove this leave application?');">
-                                        <i class='fa fa-thumbs-down'></i>
-                                        </a>
-                                    <?php } ?>
-                                        <a href="?manageleaveapplication&addremarks&id=<?=$company['laid'];?>&remarks=<?=$company['remarks'];?>" class="btn btn-primary btn-xs" title="Remarks">
-                                            <i class='fa fa-edit'></i></a>
+                                    <a href="?manageleaveapplication&id=<?= $company['laid']; ?>&disapproved" class="btn btn-danger btn-xs" title="Disapprove" 
+                                       onclick="return confirm('Do you wish to disapprove this leave application?');">
+                                       <i class='fa fa-thumbs-down'></i>
+                                    </a>
+                                    <a href="?manageleaveapplication&addremarks&id=<?=$company['laid'];?>&remarks=<?=$company['remarks'];?>" class="btn btn-primary btn-xs" title="Remarks">
+                                        <i class='fa fa-edit'></i></a>
                                 </td>
                                 <?php
                                 echo "</tr>";
