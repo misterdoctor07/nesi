@@ -45,6 +45,7 @@
             $leave="";
             $ot="";
             $pt="";
+            $ab="";
     //if(sizeof($status)>0){
         $stat=explode('/',$status);
         for($i=0;$i<sizeof($stat);$i++){
@@ -68,6 +69,9 @@
             }
             if($stat[$i]=="pt"){
                 $pt="checked";
+            }
+            if($stat[$i]=="ab"){
+                $ab="checked";
             }
         }
     // }else{
@@ -162,7 +166,8 @@
                     <input type="checkbox" name="status[]" value="nd" <?=$nd;?>> Night Differential<br>
                     <input type="checkbox" name="status[]" value="leave" <?=$leave;?>> Leave<br>
                     <input type="checkbox" name="status[]" value="ot" <?=$ot;?>> OT after 8 hours worked<br>
-                    <input type="checkbox" name="status[]" value="pt" <?=$pt;?>> OT before 8 hours worked
+                    <input type="checkbox" name="status[]" value="pt" <?=$pt;?>> OT before 8 hours worked<br>
+                    <input type="checkbox" name="status[]" value="ab" <?=$ab;?>> Absent<br>
                   </div>
                 </div>
                 <div class="form-group">

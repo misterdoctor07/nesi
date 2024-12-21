@@ -18,7 +18,8 @@
                       <th>Type of Offense</th>
                       <th>Points</th>
                       <th>Memo No.</th>
-                      <th>Remarks</th>
+                      <th>Date of Incident</th>
+                      <th>Suspention Dates</th>
                       <th>Status</th>
                       <th>Action</th>
                     </tr>
@@ -26,7 +27,7 @@
                   <tbody>
                     <?php
                     $x=1;
-                      $sqlEmployee=mysqli_query($con,"SELECT ep.*,i.id,i.dateserved,i.dateissued,i.typeofoffense,i.typeofmemo,i.points,i.memonumber,i.dateofsuspension,i.status FROM employee_profile ep INNER JOIN infraction i ON i.idno=ep.idno ORDER BY i.dateissued ASC");
+                      $sqlEmployee=mysqli_query($con,"SELECT ep.*,i.id,i.dateserved,i.dateissued,i.typeofoffense,i.dateofincident,i.typeofmemo,i.points,i.memonumber,i.dateofsuspension,i.status FROM employee_profile ep INNER JOIN infraction i ON i.idno=ep.idno ORDER BY i.dateissued ASC");
                       if(mysqli_num_rows($sqlEmployee)>0){
                         while($company=mysqli_fetch_array($sqlEmployee)){
                           $idno=$company['idno'];
@@ -38,10 +39,13 @@
                           $dateserved=$company['dateserved'];
                           $typeofoffense=$company['typeofoffense'];
                           $typeofmemo=$company['typeofmemo'];
+                          $dateofincident=$company['dateofincident'];
                           $points=$company['points'];
                           $memonumber=$company['memonumber'];
                           $dateofsuspension=$company['dateofsuspension'];
                           $status=$company['status'];
+                          
+                         
                           $sqlDept=mysqli_query($con,"SELECT d.department FROM department d LEFT JOIN employee_details ed ON ed.department=d.id WHERE ed.idno='$idno'");
                           $dept=mysqli_fetch_array($sqlDept);
                           $sqlDept=mysqli_query($con,"SELECT company FROM employee_details WHERE idno='$idno'");
@@ -62,11 +66,13 @@
                             echo "<td>$dateissued</td>";
                             echo "<td>$dateserved</td>";
                             echo "<td>$typeofmemo</td>";
-                            echo "<td>$typeofoffense</td>";                            
+                            echo "<td>$typeofoffense</td>";                       
                             echo "<td>$points</td>";
                             echo "<td align='center'>$memonumber</td>";
+                            echo "<td>$dateofincident</td>";  
                             echo "<td align='center'>$dateofsuspension</td>";
                             echo "<td align='center'>$status</td>";
+                           
                             ?>
                             <td align="center">
                             <?php

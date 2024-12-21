@@ -163,10 +163,10 @@ if (isset($_GET['disapproved']) && isset($_GET['id'])) {
                                 $x++;
                             }
                         } else {
-                            echo "<tr><td colspan='9' align='center'>No records found!</td></tr>";
+                            echo "<tr><td colspan='12' align='center'>No records found!</td></tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='9' align='center'>No records found for the requesting officers!</td></tr>";
+                        echo "<tr><td colspan='12' align='center'>No records found for the requesting officers!</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -214,10 +214,10 @@ if (isset($_POST['submitRemarks'])) {
     $remarks = mysqli_real_escape_string($con, $_POST['remarks']); // Sanitize input
 
     // Update remarks in the database
-    $sqlUpdateRemarks = "UPDATE leave_application SET remarks = '$remarks' WHERE id = '$id'";
+    $sqlUpdateRemarks = "UPDATE overtime_application SET remarks = '$remarks' WHERE id = '$id'";
     if (mysqli_query($con, $sqlUpdateRemarks)) {
         echo "<script>alert('Remarks updated successfully.');</script>";
-        echo "<script>window.location.href='?manageleaveapplication';</script>"; // Redirect after update
+        echo "<script>window.location.href='?manageovertimeapplication';</script>"; // Redirect after update
     } else {
         echo "<script>alert('Error updating remarks: " . mysqli_error($con) . "');</script>";
     }

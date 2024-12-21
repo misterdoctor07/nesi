@@ -1,4 +1,4 @@
-<div class="col-lg-12">
+            <div class="col-lg-12">
             <div class="content-panel">
               <div class="panel-heading">
               <h4><a href="?main"><i class="fa fa-arrow-left"></i> HOME</a> | <i class="fa fa-user"></i> EMPLOYEE LIST<div style="float:right;"><a href="?addemployee" class="btn btn-primary"><i class="fa fa-plus-circle"></i> Add Employee</a></div></h4>
@@ -68,7 +68,9 @@
                               <!-- <a href="?employeechecklist&id=<?=$company['id'];?>" class="btn btn-warning btn-xs" title="Employee Checklist"><i class='fa fa-check-square-o'></i></a>
                               <a href="?employeecontract&id=<?=$company['id'];?>" class="btn btn-danger btn-xs" title="Contract Status"><i class='fa fa-clipboard'></i></a> -->
                               <a href="?employeemovement&idno=<?=$company['idno'];?>" class="btn btn-default btn-xs" title="Move Employee"><i class='fa fa-mail-forward'></i></a>
-                              <!-- <a href="?employeereferral&id=<?=$company['id'];?>" class="btn btn-info btn-xs" title="Referral"><i class='fa fa-mail-reply'></i></a> -->
+                              <a href="delete_employee.php?idno=<?=$company['idno'];?>" class="btn btn-danger btn-xs" title="Delete Employee" onclick="return confirm('Are you sure you want to delete this employee?');"><i class='fa fa-trash'></i></a>
+
+                              </td>
                             </td>
                             <?php
                           echo "</tr>";
@@ -83,3 +85,5 @@
                 </div>
             </div>
             </div>
+
+            

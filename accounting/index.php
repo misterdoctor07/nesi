@@ -109,6 +109,7 @@
               </a>
             <ul class="sub">
               <li><a href="?monitorattendance">Monitor Attendance</a></li>
+              <li><a href="?holiday">Holiday Management</a></li>
             </ul>
           </li>
           <li class="sub-menu">
@@ -177,6 +178,7 @@
             if(isset($_GET['employeereferral'])){include('employeereferral.php');}
             if(isset($_GET['editoffense'])){include('editoffense.php');}
             if(isset($_GET['manageuser'])){include('manageuser.php');}
+            if(isset($_GET['holiday'])){include('holiday.php');}
 
           ?>
           <!-- /col-lg-3 -->

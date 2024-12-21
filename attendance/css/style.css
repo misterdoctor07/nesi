@@ -2024,6 +2024,10 @@ ul li {
 	color: white;
 }
 
+.lock-screen a:hover {
+	color: transparent;
+}
+
 .lock-screen i {
 	font-size: 60px;
 }

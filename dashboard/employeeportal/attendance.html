@@ -1,0 +1,105 @@
+<?php
+$id=$_SESSION['idno'];
+$sqlProfile=mysqli_query($con,"SELECT * FROM employee_profile WHERE idno='$id'");
+$profile=mysqli_fetch_array($sqlProfile);
+$idno=$profile['idno'];
+$lastname=$profile['lastname'];
+$firstname=$profile['firstname'];
+$suffix=$profile['suffix'];
+
+$sqlChecklist=mysqli_query($con,"SELECT * FROM employee_contract WHERE idno='$idno'");
+if(mysqli_num_rows($sqlChecklist)>0){
+    $checklist=mysqli_fetch_array($sqlChecklist);
+    $probationary=$checklist['probationary'];
+    $probationarydate=$checklist['probationarydate'];
+    $regular=$checklist['regular'];
+    $regulardate=$checklist['regulardate'];
+    $fulltime=$checklist['fulltime'];
+    $fulltimedate=$checklist['fulltimedate'];
+}else{
+    $probationary="";
+    $probationarydate="";
+    $regular="";
+    $regulardate="";
+    $fulltime="";
+    $fulltimedate="";
+}
+?>
+<script type="text/javascript">
+      function SubmitDetails(){        
+          return confirm('Do you wish to submit details?');        
+      }
+    </script>
+    <div class="row">
+      <div class="col-lg-12">
+      <h4 style="text-indent: 10px;"><a href="?main"><i class="fa fa-arrow-left"></i> BACK</a> | <i class="fa fa-users"></i> EMPLOYEE ATTENDANCE</h4>      
+        </div>
+    </div>
+    <form class="form-horizontal style-form" method="GET">
+      <input type="hidden" name="attendance">                        
+        <div class="col-lg-4 mt">
+            <div class="content-panel">
+              <div class="panel-heading">                                
+              <h4><i class="fa fa-calendar"></i> Select Date</h4>            
+            </div>
+            <div class="panel-body">                                                            
+                <div class="form-group">
+                  <label class="col-sm-3 col-sm-4 control-label">Run Date</label>
+                  <div class="col-sm-7">
+                    <input type="date" class="form-control" name="rundate" required>
+                  </div>
+                  <div class="col-sm-2">
+                  <input type="submit" name="submit" class="btn btn-primary" value="Submit" style="float:right;">
+                  </div>
+                </div>                
+            </div>
+          </div>
+          <!-- col-lg-12-->
+        </div>                
+        </form>
+
+  <?php
+    if(isset($_GET['submit'])){
+        $rundate=$_GET['rundate']
+        ?>                
+    <form class="form-horizontal style-form" method="GET" onSubmit="return SubmitDetails();">
+      <input type="hidden" name="attendance">                        
+    <div class="col-lg-8 mt">
+            <div class="content-panel">
+              <div class="panel-heading">
+                  <a href="dashboard.php?attendance" class="btn btn-primary" style="float:right;" title="close"><i class="fa fa-times"></i></a>
+              <h4><i class="fa fa-clock-o"></i> Attendance (<?=date('F d, Y',strtotime($rundate));?>)</h4>
+            </div>
+            <div class="panel-body">                                                            
+                <table width="100%" class="table table-bordered">
+                    <tr>
+                        <td colspan="2" align="center">1ST SHIFT</td>
+                        <td colspan="2" align="center">2ND SHIFT</td>
+                    </tr>
+                    <tr>
+                        <td align="center">LOGIN</td>
+                        <td align="center">LOGOUT</td>
+                        <td align="center">LOGIN</td>
+                        <td align="center">LOGOUT</td>
+                    </tr>
+                    <?php
+                    $sqlAttendance=mysqli_query($con,"SELECT * FROM attendance WHERE logindate='$rundate' AND idno='$idno'");
+                    if(mysqli_num_rows($sqlAttendance)>0){
+                        while($attend=mysqli_fetch_array($sqlAttendance)){
+                            echo "<tr>";
+                                echo "<td align='center'>$attend[loginam]</td>";
+                                echo "<td align='center'>$attend[logoutam]</td>";
+                                echo "<td align='center'>$attend[loginpm]</td>";
+                                echo "<td align='center'>$attend[logoutpm]</td>";
+                            echo "</tr>";
+                        }
+                    }
+                    ?>
+                </table>
+            </div>
+          </div>
+          <!-- col-lg-12-->
+        </div> 
+        <?php
+    }
+  ?>
