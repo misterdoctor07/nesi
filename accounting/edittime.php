@@ -1,72 +1,75 @@
 <?php
-    $idno=$_GET['idno'];
-    $period=$_GET['period'];
-    $id=$_GET['id'];
-    $company=$_GET['company'];
-    $sqlAttendance=mysqli_query($con,"SELECT * FROM attendance WHERE id='$id'");
-    if(mysqli_num_rows($sqlAttendance)>0){
-        $attend=mysqli_fetch_array($sqlAttendance);
-        $loginam=date('H:i',strtotime($attend['loginam']));
-        $logoutam=date('H:i',strtotime($attend['logoutam']));
-        $loginpm=date('H:i',strtotime($attend['loginpm']));
-        $logoutpm=date('H:i',strtotime($attend['logoutpm']));
-        $logindate=$attend['logindate'];
-        $status=$attend['status'];
-        $remarks=$attend['remarks'];
-    }else{
-        $loginam="";
-        $logoutam="";
-        $loginpm="";
-        $logoutpm="";
-        $logindate=$_GET['logindate'];
-        $status="";
-        $remarks="";
+$idno = $_GET['idno'];
+$period = $_GET['period'];
+$id = $_GET['id'];
+$company = $_GET['company'];
+
+// Define holidays
+$holidays = [];
+$result = mysqli_query($con, "SELECT `date`, `type` FROM holidays");
+while ($row = mysqli_fetch_assoc($result)) {
+    $holidays[$row['date']] = $row['type'];
+}
+
+$sqlAttendance = mysqli_query($con, "SELECT * FROM attendance WHERE id='$id'");
+if (mysqli_num_rows($sqlAttendance) > 0) {
+    $attend = mysqli_fetch_array($sqlAttendance);
+    $loginam = date('H:i', strtotime($attend['loginam']));
+    $logoutam = date('H:i', strtotime($attend['logoutam']));
+    $loginpm = date('H:i', strtotime($attend['loginpm']));
+    $logoutpm = date('H:i', strtotime($attend['logoutpm']));
+    $logindate = $attend['logindate'];
+    $status = $attend['status'];
+    $remarks = $attend['remarks'];
+} else {
+    $loginam = "";
+    $logoutam = "";
+    $loginpm = "";
+    $logoutpm = "";
+    $logindate = $_GET['logindate'];
+    $status = "";
+    $remarks = "";
+}
+
+// Initialize variables
+$work = $rh = $snwh = $nd = $leave = $ot = $pt = "";
+if ($remarks == "") {
+    $remarks = "P";
+}
+
+// Check if the date is a holiday and set the corresponding status
+$rh = $snwh = "";
+
+// Check if the date is a holiday and set the corresponding checkbox
+if (!empty($logindate) && isset($holidays[$logindate])) {
+    if ($holidays[$logindate] === 'rh') {
+        $rh = "checked"; // Regular Holiday
+    } elseif ($holidays[$logindate] === 'snwh') {
+        $snwh = "checked"; // Special Non-Working Holiday
     }
-            $work="";
-            $rh="";
-            $snwh="";
-            $nd="";
-            $leave="";
-            $ot="";
-            $pt="";
-            if($remarks==""){
-              $remarks="P";
-            }
-    //if(sizeof($status)>0){
-        $stat=explode('/',$status);
-        for($i=0;$i<sizeof($stat);$i++){
-            if($stat[$i]=="work"){
-                $work="checked";
-            }
-            if($stat[$i]=="rh"){
-                $rh="checked";
-            }
-            if($stat[$i]=="snwh"){
-                $snwh="checked";
-            }
-            if($stat[$i]=="nd"){
-                $nd="checked";
-            }
-            if($stat[$i]=="leave"){
-                $leave="checked";
-            }
-            if($stat[$i]=="ot"){
-                $ot="checked";
-            }
-            if($stat[$i]=="pt"){
-                $pt="checked";
-            }
-        }
-    // }else{
-    //         $work="";
-    //         $rh="";
-    //         $snwh="";
-    //         $nd="";
-    //         $leave="";
-    //         $ot="";
-    //         $pt="";
-    // }
-    ?>
+}
+
+// Parse the status and set the appropriate checks
+$stat = explode('/', $status);
+for ($i = 0; $i < sizeof($stat); $i++) {
+    if ($stat[$i] == "work") {
+        $work = "checked";
+    }
+    if ($stat[$i] == "nd") {
+        $nd = "checked";
+    }
+    if ($stat[$i] == "leave") {
+        $leave = "checked";
+    }
+    if ($stat[$i] == "ot") {
+        $ot = "checked";
+    }
+    if ($stat[$i] == "pt") {
+        $pt = "checked";
+    }
+}
+?>
+
     <script type="text/javascript">
       function SubmitDetails(){
           return confirm('Do you wish to submit details?');

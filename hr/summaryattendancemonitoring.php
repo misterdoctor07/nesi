@@ -136,65 +136,32 @@ $dept = isset($_GET['departments']) ? $_GET['departments'] : [];
                                                 $endshift = $company['endshift'];
 
                                                 
-                                                $lateThreshold = date('H:i:s', strtotime($shiftfrom) + 15 * 60);
+                                                $lateThreshold = date('H:i:s', strtotime($shiftfrom) + 1 * 60);
                                                 $remarks = ($attend['loginam'] > $lateThreshold) ? 'L' : 'P';
                                                 $loginTime = $attend['loginam'];
                                                 
                                                 // Special condition for 12 AM shifts
                                                 if ($shiftfrom === '00:00:00') {
                                                     // Allow logins from the previous day (e.g., 11 PM) to not be late
-                                                    $previousDayStart = date('H:i:s', strtotime('-1 day', strtotime('10:00 PM')));
+                                                    $previousDayStart = date('H:i:s', strtotime('-1 day', strtotime('11:00 PM')));
                                                     $remarks = ($loginTime >= $previousDayStart || $loginTime <= $lateThreshold) ? 'P' : 'L';
                                                 } elseif ($loginTime > $lateThreshold || ($loginTime >= '00:00:00' && $loginTime <= '02:00:00')) {
                                                     $remarks = 'L';
                                                 } else {
                                                     $remarks = 'P';
                                                 }
-                                                // If the user is late, assign offense points and remarks automatically
-                                                if ($remarks === 'L') {
-                                                    // Query offense details for "late with 15 mins" (assuming offense ID is 16)
-                                                    $sqlOffense = mysqli_query($con, "SELECT * FROM offense WHERE id='15'");
-                                                    $off = mysqli_fetch_array($sqlOffense);
-                                                    $code = str_replace('Attendance Infraction ', '', $off['title']);
-                                                    $penalty = $off['fpoints'];
-                                                    $frequency = $off['frequency'] - 1;
                                         
-                                                    // Check frequency within the current period
-                                                    $freq = 0;
-                                                    $firstStartMonth = date('Y') . "-01-01";
-                                                    $firstEndMonth = date('Y') . "-06-30";
-                                                    $secondStartMonth = date('Y') . "-07-01";
-                                                    $secondEndMonth = date('Y') . "-12-31";
-                                        
-                                                    if (strtotime($attend['logindate']) >= strtotime($firstStartMonth) && strtotime($attend['logindate']) <= strtotime($firstEndMonth)) {
-                                                        $sqlInstance = mysqli_query($con, "SELECT * FROM points WHERE logindate BETWEEN '$firstStartMonth' AND '$firstEndMonth' AND offense='15' AND idno='$idno'");
-                                                        $freq += mysqli_num_rows($sqlInstance);
-                                                    } elseif (strtotime($attend['logindate']) >= strtotime($secondStartMonth) && strtotime($attend['logindate']) <= strtotime($secondEndMonth)) {
-                                                        $sqlInstance = mysqli_query($con, "SELECT * FROM points WHERE logindate BETWEEN '$secondStartMonth' AND '$secondEndMonth' AND offense='15' AND idno='$idno'");
-                                                        $freq += mysqli_num_rows($sqlInstance);
-                                                    }
-                                        
-                                                    // Calculate points based on frequency
-                                                    $points = ($freq >= $frequency) ? $off['points'] + $penalty : $off['points'];
-                                        
-                                                    // Insert or update points in points table
-                                                    $sqlPointCheck = mysqli_query($con, "SELECT * FROM points WHERE idno='$idno' AND logindate='{$attend['logindate']}' AND offense='15'");
-                                                    if (mysqli_num_rows($sqlPointCheck) > 0) {
-                                                        $sqlInsert = mysqli_query($con, "UPDATE points SET points='$points' WHERE idno='$idno' AND logindate='{$attend['logindate']}' AND offense='15'");
-                                                    } else {
-                                                        $sqlInsert = mysqli_query($con, "INSERT INTO points (idno, logindate, points, offense) VALUES ('$idno', '{$attend['logindate']}', '$points', '15')");
-                                                    }
-                                        
-                                                    // Update attendance remarks with offense code
-                                                    mysqli_query($con, "UPDATE attendance SET remarks='$code' WHERE idno='$idno' AND logindate='{$attend['logindate']}'");
-                                                    $color = "style='color:red;'"; // Red color for late
-                                                } else {
-                                                    $color = "";
-                                                }
-                                        
-                                                $colorLogoutAM = "";
-                                                $colorLoginPM = "";
-                                                $colorLogoutPM = "";
+                        // If the user is late, assign offense points and remarks automatically
+                        if ($remarks === 'L') {
+                          
+                            $color = "style='color:red;'"; // Red color for late
+                        } else {
+                            $color = "";
+                        }
+                
+                        $colorLogoutAM = "";
+                        $colorLoginPM = "";
+                        $colorLogoutPM = "";
 
                                            
 
@@ -416,7 +383,7 @@ $dept = isset($_GET['departments']) ? $_GET['departments'] : [];
 
                                         
                                         // Set late threshold (15 minutes after startshift)
-                                        $lateThreshold = date('H:i:s', strtotime($shiftfrom) + 15 * 60);
+                                        $lateThreshold = date('H:i:s', strtotime($shiftfrom) + 1 * 60);
                                         $remarks = ($attend['loginam'] > $lateThreshold) ? 'L' : 'P';
                                         $loginTime = $attend['loginam'];
                                         
@@ -433,41 +400,7 @@ $dept = isset($_GET['departments']) ? $_GET['departments'] : [];
                                 
                 // If the user is late, assign offense points and remarks automatically
                 if ($remarks === 'L') {
-                    // Query offense details for "late with 15 mins" (assuming offense ID is 16)
-                    $sqlOffense = mysqli_query($con, "SELECT * FROM offense WHERE id='15'");
-                    $off = mysqli_fetch_array($sqlOffense);
-                    $code = str_replace('Attendance Infraction ', '', $off['title']);
-                    $penalty = $off['fpoints'];
-                    $frequency = $off['frequency'] - 1;
-        
-                    // Check frequency within the current period
-                    $freq = 0;
-                    $firstStartMonth = date('Y') . "-01-01";
-                    $firstEndMonth = date('Y') . "-06-30";
-                    $secondStartMonth = date('Y') . "-07-01";
-                    $secondEndMonth = date('Y') . "-12-31";
-        
-                    if (strtotime($attend['logindate']) >= strtotime($firstStartMonth) && strtotime($attend['logindate']) <= strtotime($firstEndMonth)) {
-                        $sqlInstance = mysqli_query($con, "SELECT * FROM points WHERE logindate BETWEEN '$firstStartMonth' AND '$firstEndMonth' AND offense='15' AND idno='$idno'");
-                        $freq += mysqli_num_rows($sqlInstance);
-                    } elseif (strtotime($attend['logindate']) >= strtotime($secondStartMonth) && strtotime($attend['logindate']) <= strtotime($secondEndMonth)) {
-                        $sqlInstance = mysqli_query($con, "SELECT * FROM points WHERE logindate BETWEEN '$secondStartMonth' AND '$secondEndMonth' AND offense='15' AND idno='$idno'");
-                        $freq += mysqli_num_rows($sqlInstance);
-                    }
-        
-                    // Calculate points based on frequency
-                    $points = ($freq >= $frequency) ? $off['points'] + $penalty : $off['points'];
-        
-                    // Insert or update points in points table
-                    $sqlPointCheck = mysqli_query($con, "SELECT * FROM points WHERE idno='$idno' AND logindate='{$attend['logindate']}' AND offense='15'");
-                    if (mysqli_num_rows($sqlPointCheck) > 0) {
-                        $sqlInsert = mysqli_query($con, "UPDATE points SET points='$points' WHERE idno='$idno' AND logindate='{$attend['logindate']}' AND offense='15'");
-                    } else {
-                        $sqlInsert = mysqli_query($con, "INSERT INTO points (idno, logindate, points, offense) VALUES ('$idno', '{$attend['logindate']}', '$points', '15')");
-                    }
-        
-                    // Update attendance remarks with offense code
-                    mysqli_query($con, "UPDATE attendance SET remarks='$code' WHERE idno='$idno' AND logindate='{$attend['logindate']}'");
+                  
                     $color = "style='color:red;'"; // Red color for late
                 } else {
                     $color = "";

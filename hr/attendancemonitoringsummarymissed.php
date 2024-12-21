@@ -80,23 +80,23 @@ $comp=mysqli_fetch_array($sqlCompany);
                       <td align="center" width="5%">CODE</td>
                     </tr>
                     <tr>
-                      <td>2 mins over-break (morning)</td>
+                      <td>2 mins over-break (lunch)</td>
                       <td align="center">0.2</td>
-                      <td align="center">M</td>
-                      <td>2 mins over-break (both morning and lunch break)</td>
+                      <td align="center">L</td>
+                      <td>Forgot to clock in (first shift) and failed to submit form and Over-break</td>
                       <td align="center">0.4</td>
-                      <td align="center">B</td>
+                      <td align="center">B-</td>
                       <td>Forgot to clock in (first shift) and failed to submit form</td>
                       <td align="center">0.2</td>
                       <td align="center">I-</td>
                     </tr>
                     <tr>
-                      <td>2 mins over-break (lunch)</td>
+                      <td>Forgot to clock in/out (Lunch) w/ non-work related reason</td>
                       <td align="center">0.2</td>
-                      <td align="center">OB</td>
-                      <td>Forgot to clock in/out w/ non-work related reason</td>
-                      <td align="center">0.2 (freq)</td>
-                      <td align="center">-</td>
+                      <td align="center">L-</td>
+                      <td>Forgot to clock in (first shift) and failed to submit form and Missed Out/In (Lunch)</td>
+                      <td align="center">0.4</td>
+                      <td align="center">M</td>
                       <td colspan="3"></td>
                     </tr>
                   </table>
@@ -134,10 +134,10 @@ $comp=mysqli_fetch_array($sqlCompany);
                         M
                       </th>
                       <th width="1.5%" rowspan="2">
-                        OB
+                        L
                       </th>
                       <th width="1.5%" rowspan="2">
-                        L
+                        B-
                       </th>
                       <th width="1.5%" rowspan="2">
                         Total
@@ -205,19 +205,29 @@ $comp=mysqli_fetch_array($sqlCompany);
                               if(mysqli_num_rows($sqlAttendance)>0){
                                 $rem=mysqli_fetch_array($sqlAttendance);
                                 $remarks=$rem['remarks'];
-                                if($remarks=="Code L"){
+                                if($remarks=="Code L-"){
                                   $l++;
                                   $remarks=str_replace('Code ','',$remarks)."";
                                   $color="background-color:#f4c7c3;";
-                                }elseif($remarks=="Code I"){
+                                }elseif($remarks=="Code I-"){
                                   $il++;
                                   $remarks=str_replace('Code ','',$remarks)."";
                                   $color="background-color:#f4c7c3;";
-                                }elseif($remarks=="Code OB"){
+                                }elseif($remarks=="Code L"){
                                     $l++;
                                     $remarks=str_replace('Code ','',$remarks)."";
                                     $color="background-color:#f4c7c3;";
-                                }else{
+                                }elseif($remarks=="Code M"){
+                                  $l++;
+                                  $remarks=str_replace('Code ','',$remarks)."";
+                                  $color="background-color:#f4c7c3;";
+                              }
+                                elseif($remarks=="Code B-"){
+                                  $m++;
+                                  $remarks=str_replace('Code ','',$remarks)."";
+                                  $color="background-color:#f4c7c3;";
+                              }
+                                else{
                                   $remarks="-";
                                   $color="";
                                 }
@@ -230,9 +240,9 @@ $comp=mysqli_fetch_array($sqlCompany);
                               <?php
                             }
                             echo "<td style='border-top:0; border-bottom:0;'></td>";
-                            echo "<td align='center'></td>";
+                            echo "<td align='center'>$m</td>";
                             echo "<td align='center'>$l</td>";
-                            echo "<td align='center'></td>";
+                            echo "<td align='center'>$b</td>";
                             echo "<td align='center'></td>";
                             echo "<td align='center'></td>";
                             echo "<td align='center'>$il</td>";

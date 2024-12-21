@@ -45,10 +45,6 @@ date_default_timezone_set("Asia/Manila");
   <!-- Custom styles for this template -->
   <link href="css/style.css" rel="stylesheet">
   <link href="css/style-responsive.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.2/moment.min.js"></script>
-<script src="script-clock.js"></script>
-<script src="snow.js"></script>
-
   
   <!-- =======================================================
     Template Name: Dashio
@@ -56,24 +52,20 @@ date_default_timezone_set("Asia/Manila");
     Author: TemplateMag.com
     License: https://templatemag.com/license/
   ======================================================= -->
-
 </head>
 
-<body onload="getTime()" >
+<body onload="getTime()">
   <!-- **********************************************************************************************************************************************************
       MAIN CONTENT
       *********************************************************************************************************************************************************** -->
-       <div class="snow-container"></div>
+      <div class="snow-container"></div>
   <div class="container" align="center">    
   <div class="date-container" style="font-size: 96px; text-transform: uppercase;" >
   <p id="show-date"></p>
   </div>
-
   <!--<div id="showtime" style="color:black; font-weight:bold  ; background-color:#f0ed49; width:35%; border-radius: 10%;"></div> -->
   <div class="clock-container" style="align-items: center; display: flex; justify-content: center; border-radius: 20px 20px 20px 20px; margin-top: 100px;">
-    
   <div class="clock-col">
-    
     <p class="clock-day clock-timer">
     </p>
     <p class="clock-label">
@@ -109,7 +101,7 @@ date_default_timezone_set("Asia/Manila");
     </p>
   </div>
 </div>
-  <script >src="snow.js"</script> 
+  
 <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.2/moment.min.js'></script><script  src="./script-clock.js"></script>
 <script>
     // Get the current date
@@ -136,7 +128,7 @@ date_default_timezone_set("Asia/Manila");
                     <h2>
                       <a data-toggle="modal" href="#myModal" class="btn btn-primary attendance" data-id="loginam" style="background:#3079b6 ; border-radius: 40px 40px;" auto>
                         <img src="img/login.png" height="80" alt="Login Image">
-                        <br>LOGIN IN
+                        <br>LOGIN
                       </a>
                     </h2st>
                   </td>
@@ -160,7 +152,7 @@ date_default_timezone_set("Asia/Manila");
                   <h2>
                       <a data-toggle="modal" href="#myModal" class="btn btn-primary attendance" data-id="logoutpm" style="background:#3079b6 ; border-radius: 40px 40px;">
                         <img src="img/logout.png" height="80" alt="Login Image">
-                        <br>LOGIN OUT
+                        <br>LOGOUT
                       </a>
                     </h2>
                   </td>
@@ -173,7 +165,6 @@ date_default_timezone_set("Asia/Manila");
 </div>
       </h2>
       </td>
-     
       <?php
 // Assuming you have established a connection to the database
 include('../config.php'); // Ensure this path is correct
@@ -374,9 +365,6 @@ $unreadCount = count($announcements); // Count unread announcements
         }
 
         if ($logintype === 'loginam') {
-            // Check if the employee has already logged in for AM
-    // Assume $attendanceRecord is retrieved from the database
-// Example: $attendanceRecord = mysqli_fetch_array($sqlAttendance);
 if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceRecord['loginam'] !== '0') {
   echo "<script>
       document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
@@ -438,6 +426,11 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
 }elseif ($logintype === 'logoutam') {
             // Check if the employee has already logged out for AM
             $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$currentDate'"));
+            if (empty($attendanceRecord) && $currentTime < "09:00:00") {
+                      // Check for yesterday's loginam
+                      $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
+                      $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
+                  }
             if ($attendanceRecord && !empty($attendanceRecord['logoutam']) && $attendanceRecord['logoutam'] !== '0') {
               echo "<script>
                   document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
@@ -447,21 +440,41 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
               </script>";
               exit;
             }
-            if (empty($attendanceRecord) && $currentTime < "06:00:00") {
-              // Check for yesterday's loginam
-              $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
-              $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
-          }
+        //     if (empty($attendanceRecord) && $currentTime < "09:00:00") {
+        //       // Check for yesterday's loginam
+        //       $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
+        //       $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
+        //   }
       
-          if (empty($attendanceRecord) || empty($attendanceRecord['loginam']) || $attendanceRecord['loginam'] === '0') {
-            echo "<script>
-                document.getElementById('remarksError').innerHTML = 'You need to lLOGIN FIRST!!';
-                setTimeout(function() {
-                        window.location='../attendance/';
-                    }, 1000);
-            </script>";
-            exit;
-        }
+        //   if (empty($attendanceRecord) || empty($attendanceRecord['loginam']) || $attendanceRecord['loginam'] === '0') {
+        //     echo "<script>
+        //         // Create a div element for the error message
+        //         var errorDiv = document.createElement('div');
+        //         errorDiv.id = 'errorPopup';
+        //         errorDiv.innerHTML = 'You need to LOGIN FIRST!!';
+                
+        //         // Style the div
+        //         errorDiv.style.position = 'fixed';
+        //         errorDiv.style.top = '0';
+        //         errorDiv.style.left = '0';
+        //         errorDiv.style.width = '100%';
+        //         errorDiv.style.backgroundColor = 'red';
+        //         errorDiv.style.color = 'white';
+        //         errorDiv.style.textAlign = 'center';
+        //         errorDiv.style.padding = '10px';
+        //         errorDiv.style.zIndex = '1000';
+        
+        //         // Append the div to the body
+        //         document.body.appendChild(errorDiv);
+        
+        //         // Redirect after a delay
+        //         setTimeout(function() {
+        //             document.body.removeChild(errorDiv);
+        //             window.location='../attendance/';
+        //         }, 5000);
+        //     </script>";
+        //     exit;
+        // }
         
           
             // Retrieve the most recent attendance record for this employee
@@ -487,6 +500,11 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
         } elseif ($logintype === 'loginpm') {
             // Check if the employee has already logged in for PM
             $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$currentDate'"));
+            if (empty($attendanceRecord) && $currentTime < "09:00:00") {
+                      // Check for yesterday's loginam
+                      $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
+                      $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
+                  }
             if ($attendanceRecord && !empty($attendanceRecord['loginpm']) && $attendanceRecord['loginpm'] !== '0') {
               echo "<script>
                   document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
@@ -496,29 +514,70 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
               </script>";
               exit;
             }
-            if (empty($attendanceRecord) && $currentTime < "06:00:00") {
-              // Check for yesterday's loginam
-              $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
-              $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
-          }
-            if ($logintype === 'loginpm' && (empty($attendanceRecord['loginam']) || $attendanceRecord['loginam'] === '0')) {
-              echo "<script>
-                  document.getElementById('remarksError').innerHTML = 'You need to LOGIN FIRST!';
-                 setTimeout(function() {
-                      window.location='../attendance/';
-                  }, 1000);
-              </script>";
-              exit;
-          }
-          if ($logintype === 'loginpm' && (empty($attendanceRecord['logoutam']) || $attendanceRecord['logoutam'] === '0')) {
-            echo "<script>
-                document.getElementById('remarksError').innerHTML = 'You need to LUNCHOUT FIRST!';
-               setTimeout(function() {
-                    window.location='../attendance/';
-                }, 1000);
-            </script>";
-            exit;
-        }
+      //       if (empty($attendanceRecord) && $currentTime < "09:00:00") {
+      //         // Check for yesterday's loginam
+      //         $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
+      //         $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
+      //     }
+      //     if ($logintype === 'loginpm' && (empty($attendanceRecord['loginam']) || $attendanceRecord['loginam'] === '0')) {
+      //       echo "<script>
+      //       // Create a div element for the error message
+      //       var errorDiv = document.createElement('div');
+      //       errorDiv.id = 'errorPopup';
+      //       errorDiv.innerHTML = 'You need to LOGIN FIRST!!';
+            
+      //       // Style the div
+      //       errorDiv.style.position = 'fixed';
+      //       errorDiv.style.top = '0';
+      //       errorDiv.style.left = '0';
+      //       errorDiv.style.width = '100%';
+      //       errorDiv.style.backgroundColor = 'red';
+      //       errorDiv.style.color = 'white';
+      //       errorDiv.style.textAlign = 'center';
+      //       errorDiv.style.padding = '10px';
+      //       errorDiv.style.zIndex = '1000';
+    
+      //       // Append the div to the body
+      //       document.body.appendChild(errorDiv);
+    
+      //       // Redirect after a delay
+      //       setTimeout(function() {
+      //           document.body.removeChild(errorDiv);
+      //           window.location='../attendance/';
+      //       }, 5000);
+      //   </script>";
+      //   exit;
+      //   }
+      //   if ($logintype === 'loginpm' && (empty($attendanceRecord['logoutam']) || $attendanceRecord['logoutam'] === '0')) {
+      //     echo "<script>
+      //     // Create a div element for the error message
+      //     var errorDiv = document.createElement('div');
+      //     errorDiv.id = 'errorPopup';
+      //     errorDiv.innerHTML = 'You need to LUNCHOUT FIRST!!';
+          
+      //     // Style the div
+      //     errorDiv.style.position = 'fixed';
+      //     errorDiv.style.top = '0';
+      //     errorDiv.style.left = '0';
+      //     errorDiv.style.width = '100%';
+      //     errorDiv.style.backgroundColor = 'red';
+      //     errorDiv.style.color = 'white';
+      //     errorDiv.style.textAlign = 'center';
+      //     errorDiv.style.padding = '10px';
+      //     errorDiv.style.zIndex = '1000';
+  
+      //     // Append the div to the body
+      //     document.body.appendChild(errorDiv);
+  
+      //     // Redirect after a delay
+      //     setTimeout(function() {
+      //         document.body.removeChild(errorDiv);
+      //         window.location='../attendance/';
+      //     }, 5000);
+      // </script>";
+      // exit;
+      // }
+     
        
           
             // Retrieve the most recent attendance record for this employee
@@ -543,7 +602,12 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
 
         } elseif ($logintype === 'logoutpm') {
             // Check if the employee has already logged out for PM
-           
+            $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$currentDate'"));
+            if (empty($attendanceRecord) && $currentTime < "12:00:00") {
+              // Check for yesterday's loginam
+              $yesterdayDate = date('Y-m-d', strtotime('-1 day'));
+              $attendanceRecord = mysqli_fetch_array(mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' AND logindate='$yesterdayDate'"));
+          }
             if ($attendanceRecord && !empty($attendanceRecord['logoutpm']) && $attendanceRecord['logoutpm'] !== '0') {
               echo "<script>
                   document.getElementById('remarksError').innerHTML = 'You have already registered in this session!';
@@ -553,7 +617,10 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
               </script>";
               exit;
           }
-          
+        
+           
+      
+       
             // Retrieve the most recent attendance record for this employee
             $sqlCheckLatestSession = mysqli_query($con, "SELECT * FROM attendance WHERE idno='$empid' ORDER BY logindate DESC LIMIT 1");
             $latestAttendanceRecord = mysqli_fetch_array($sqlCheckLatestSession);
@@ -590,7 +657,6 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
 ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
   <!-- /container -->
   <!-- js placed at the end of the document so the pages load faster -->
   <script src="lib/jquery/jquery.min.js"></script>
@@ -715,7 +781,7 @@ if ($attendanceRecord && !empty($attendanceRecord['loginam']) && $attendanceReco
       opacity: 0;
       transform: translateY(0);
     }
-    10 % {
+    10% {
       opacity: 1;
     }
     100% {

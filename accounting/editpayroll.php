@@ -33,7 +33,7 @@ if(mysqli_num_rows($sqlPayrollDetails)>0){
     </script>
     <div class="row">
       <div class="col-lg-12">
-      <h4 style="text-indent: 10px;"><a href="javascript:history.back();"><i class="fa fa-arrow-left"></i> BACK</a> | <i class="fa fa-money"></i> EDIT PAYROLL</h4>
+      <h4 style="text-indent: 10px;"><a href="?managepayroll.php"><i class="fa fa-arrow-left"></i> BACK</a> | <i class="fa fa-money"></i> EDIT PAYROLL</h4>
     </div>
     </div>
     <?php
@@ -196,7 +196,7 @@ if(mysqli_num_rows($sqlPayrollDetails)>0){
                           }
                         }
 
-                        if($nd > 0){//Regular worked with Night Differential
+                        if($nd > 0 && $work >0){//Regular worked with Night Differential
                           if($employeedetails['startshift']=="04:00:00"){
                             $ndhrs1=round(abs(strtotime('06:00:00') - $time1am) / 3600,2);
                             $ndhrs2=round(abs($time2am - strtotime('06:00:00')) / 3600,2);

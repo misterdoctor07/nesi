@@ -8,6 +8,7 @@ date_default_timezone_set("Asia/Manila");
     echo "<script>window.location='../employeeportal/';</script>";
   }
     $sqlEmployee=mysqli_query($con,"SELECT lastname,firstname FROM employee_profile WHERE idno='$_SESSION[idno]'");
+    
     if(mysqli_num_rows($sqlEmployee)>0){
       $name=mysqli_fetch_array($sqlEmployee);
       $fullname=$name['lastname'].", ".$name['firstname'];
@@ -31,6 +32,7 @@ date_default_timezone_set("Asia/Manila");
       $department="";
       $company="";
     }
+    $designation = $jobtitleID;
 ?>
         <?php
           $count=0;
@@ -47,6 +49,7 @@ date_default_timezone_set("Asia/Manila");
           }else{
             $view="style='display:none;'";
           }
+          
           ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -197,6 +200,15 @@ date_default_timezone_set("Asia/Manila");
               <span>Missed Log</span>
               </a>
           </li>
+          <li>
+    <?php if ($designation == 8): ?>
+        <a href="dashboard.php?manageinfraction">
+            <i class="fa fa-info"></i>
+            <span>Manage Infraction</span>
+        </a>
+    <?php endif; ?>
+</li>
+
         </ul>
         <!-- sidebar menu end-->
       </div>
@@ -239,7 +251,9 @@ date_default_timezone_set("Asia/Manila");
             if(isset($_GET['employeereferral'])){include('employeereferral.php');}
             if(isset($_GET['editoffense'])){include('editoffense.php');}
             if(isset($_GET['manageuser'])){include('manageuser.php');}
+            if(isset($_GET['manageinfraction'])){include('manageinfraction.php');}
             if(isset($_GET['getnotifications'])){include('getnotifications.php');}
+
           ?>
           <!-- /col-lg-3 -->
         </div>

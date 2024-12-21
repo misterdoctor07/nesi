@@ -209,18 +209,108 @@ $points = number_format((float)$points, 1, '.', '');
               <div class="col-md-4 profile-text">
                 <h3><?=$empname;?></h3>
                 <h6><?=$designation;?></h6>
-                <p><?=$companyname;?></p>
-                
-              
-
-                           
+                <p><?=$companyname;?></p>    
                 <br>
+                <?php
+// PHP Code (unchanged from the previous step)
+$total_points = 0;
+$breakdown = [];
+$breakdown_html = ""; // Initialize $breakdown_html to avoid warnings
 
-                <p style="color:red; font-size: 16px;">  <tr >
-    <td width="100%">Points:</td>
-    <td><?=$points;?></td>
-</tr></p>
-              </div>
+// Translation mapping
+$translations = [
+    "12" => "Absent with proper called-in",
+    "13" => "Absent with proper called-in, Invalid reason",
+    "65" => "Forgot to clock in (first shift) and failed to submit form and Over-break",
+    "15" => "Late within 15 minutes",
+    "16" => "Late 16 minutes and up with called-in",
+    "17" => "Late 16 minutes and up without called-in",
+    "22" => "Forgot to clock in (first shift) and failed to submit form",
+    "19" => "Over - Break (2 minutes and up)",
+    "63" => "Forgot to clock in/out (Lunch) w/ non-work related reason",
+    "62" => "Absence Without Leave",
+    "66" => "Forgot to clock in (first shift) and failed to submit form and Missed Out/In (Lunch)",
+];
+
+// Query to fetch points breakdown
+$sqlPointsBreakdown = mysqli_query($con, "SELECT offense, points, logindate FROM points WHERE idno='$idno'");
+
+if (mysqli_num_rows($sqlPointsBreakdown) > 0) {
+    while ($row = mysqli_fetch_assoc($sqlPointsBreakdown)) {
+        // Translate offense if a match is found
+        $translated_offense = isset($translations[$row['offense']]) ? $translations[$row['offense']] : $row['offense'];
+        
+        $breakdown[] = [
+            'offense' => $translated_offense,
+            'points' => (float)$row['points'],
+            'logindate' => $row['logindate']
+        ];
+        $total_points += (float)$row['points'];
+    }
+} else {
+    $total_points = 0;
+}
+
+// Format total points to 1 decimal place
+$total_points = number_format((float)$total_points, 1, '.', '');
+
+// Generate the breakdown HTML
+$breakdown_html = "<ul style='margin: 0; padding: 0; list-style: none;'>";
+if (count($breakdown) > 0) {
+    foreach ($breakdown as $item) {
+        $formatted_date = date("Y-m-d", strtotime($item['logindate']));
+        $breakdown_html .= "<li>" . number_format($item['points'], 1, '.', '') . " : " . htmlspecialchars($item['offense']) . " (Date: " . $formatted_date . ")</li>";
+    }
+} else {
+    $breakdown_html .= "<li>No points recorded.</li>";
+}
+$breakdown_html .= "</ul>";
+?>
+<!-- HTML Section -->
+<p style="color:red; font-size: 16px;">
+    <span id="points-container" style="cursor: pointer;">
+        Points: <?= $total_points; ?>
+    </span>
+</p>
+
+<!-- Modal Structure -->
+<div id="breakdown-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+    <div style="position: relative; margin: 10% auto; padding: 20px; background: white; width: 50%; border-radius: 8px;">
+        <h3>Points Breakdown</h3>
+        <div id="breakdown-content">
+            <?= $breakdown_html; ?>
+        </div>
+        <button id="close-modal" style="margin-top: 20px; background: red; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close</button>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const pointsContainer = document.getElementById('points-container');
+        const breakdownModal = document.getElementById('breakdown-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        // Open the modal
+        pointsContainer.addEventListener('click', function () {
+            breakdownModal.style.display = 'block';
+        });
+
+        // Close the modal
+        closeModal.addEventListener('click', function () {
+            breakdownModal.style.display = 'none';
+        });
+
+        // Close the modal if the user clicks outside the modal content
+        window.addEventListener('click', function (event) {
+            if (event.target === breakdownModal) {
+                breakdownModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+</div>
               <!-- /col-md-4 -->
               <?php
             

@@ -405,7 +405,13 @@
                               $color = "background-color:#ffcccc;";
                               $a++;
                                     
-                                } elseif ($remarks == "Code B") {
+                                }
+                                elseif ($remarks == "Code W"|| strpos($remarks, "-W") !== false) {
+                                  if ($remarks == "Code W") {
+                                    $remarks = date('h:i', strtotime($rem['loginam']));
+                                }
+                                $color = "background-color:#ffcccc;"; }
+                                elseif ($remarks == "Code B") {
                                   $remarks = "CI-B";
                                   $color = "background-color:#ffcccc;";
                                   $b++;
@@ -413,7 +419,7 @@
                                   $remarks = "CI-C";
                                   $color = "background-color:#ffcccc;";
                                   $c++;
-                              } elseif (in_array($remarks, ["Code L", "Code I", "Code OB"])) {
+                              } elseif (in_array($remarks, ["Code L-", "Code I-", "Code L, Code M, Code B-"])) {
                                   $remarks = "P";
                                   $color = ""; // No color for these remarks
                               } elseif (in_array($remarks, ["PTO", "VL", "SL", "BLP", "AWOL", "CI-A", "CI"])) {
